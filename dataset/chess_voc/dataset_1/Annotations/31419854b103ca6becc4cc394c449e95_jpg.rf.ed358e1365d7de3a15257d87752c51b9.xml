@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>31419854b103ca6becc4cc394c449e95_jpg.rf.ed358e1365d7de3a15257d87752c51b9.jpg</filename>
+	<path>31419854b103ca6becc4cc394c449e95_jpg.rf.ed358e1365d7de3a15257d87752c51b9.jpg</path>
+	<source>
+		<database>roboflow.ai</database>
+	</source>
+	<size>
+		<width>416</width>
+		<height>416</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>white-queen</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>208</xmin>
+			<xmax>232</xmax>
+			<ymin>99</ymin>
+			<ymax>169</ymax>
+		</bndbox>
+	</object>
+</annotation>

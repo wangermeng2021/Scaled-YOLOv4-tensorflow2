@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>5825608dccde6544eef91822136079d0_jpg.rf.62780259541cb1ed0b071c0594b71147.jpg</filename>
+	<path>5825608dccde6544eef91822136079d0_jpg.rf.62780259541cb1ed0b071c0594b71147.jpg</path>
+	<source>
+		<database>roboflow.ai</database>
+	</source>
+	<size>
+		<width>416</width>
+		<height>416</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>white-knight</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>312</xmin>
+			<xmax>337</xmax>
+			<ymin>112</ymin>
+			<ymax>166</ymax>
+		</bndbox>
+	</object>
+</annotation>

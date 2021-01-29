@@ -1,0 +1,12 @@
+pretrain/ScaledYOLOV4_p5_coco_pretrain/*
+temp
+tmp
+*tmp
+*_tmp
+*_temp
+checkpoints/*
+.idea/*
+*.h5
+*__pycache__*
+*.pyc
+*.pyo

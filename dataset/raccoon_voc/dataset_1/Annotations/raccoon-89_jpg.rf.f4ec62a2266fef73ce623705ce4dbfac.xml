@@ -1,0 +1,27 @@
+<annotation>
+	<folder></folder>
+	<filename>raccoon-89_jpg.rf.f4ec62a2266fef73ce623705ce4dbfac.jpg</filename>
+	<path>raccoon-89_jpg.rf.f4ec62a2266fef73ce623705ce4dbfac.jpg</path>
+	<source>
+		<database>roboflow.ai</database>
+	</source>
+	<size>
+		<width>259</width>
+		<height>194</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>raccoon</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<occluded>0</occluded>
+		<bndbox>
+			<xmin>19</xmin>
+			<xmax>226</xmax>
+			<ymin>7</ymin>
+			<ymax>177</ymax>
+		</bndbox>
+	</object>
+</annotation>
