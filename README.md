@@ -51,11 +51,11 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
   
   single scale:
   ```
-  python train.py --dataset dataset/chess_voc  --epochs 100 --batch-size 8 --multi-scale 416
+  python train.py --dataset dataset/chess_voc  --epochs 300 --batch-size 8 --multi-scale 416
   ```
   multi scale:
   ```
-  python train.py --dataset dataset/chess_voc  --epochs 100 --batch-size 8 --multi-scale 416,512,640
+  python train.py --dataset dataset/chess_voc  --epochs 300 --batch-size 8 --multi-scale 416,512,640
   ```
 ## Evaluation results(GTX1070,mAP@0.5,batch_size=4,single scale):
 
@@ -80,7 +80,7 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 * Generate class names file(such as xxx.names)
 * 
   ```
-  python train.py --dataset your_dataset_root_dir --num-classes num_of_classes --class-names path_of_xxx.names --epochs 200 --batch-size 8 --multi-scale 416
+  python train.py --dataset your_dataset_root_dir --num-classes num_of_classes --class-names path_of_xxx.names --epochs 300 --batch-size 8 --multi-scale 416
   ```
 ## References
 * [https://github.com/WongKinYiu/ScaledYOLOv4](https://github.com/WongKinYiu/ScaledYOLOv4)
