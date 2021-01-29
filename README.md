@@ -1,4 +1,8 @@
-# Features
+
+# Scaled-YOLOv4-tensorflow2
+A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: Scaling Cross Stage Partial Network](https://arxiv.org/abs/2011.08036)
+
+## Features
 - [x] yolov4-large p5
 - [x] yolov4-large p6
 - [x] yolov4-large p7
@@ -27,9 +31,6 @@
 - [ ] yolov4-csp
 - [ ] yolov4-tiny
 - [ ] Tensorflow Serving
-
-# Scaled-YOLOv4-tensorflow2
-A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: Scaling Cross Stage Partial Network](https://arxiv.org/abs/2011.08036)
 
 ## Installation
 ###  1. Clone project
