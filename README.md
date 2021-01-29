@@ -43,7 +43,7 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 *     pip install -r requirements.txt
 
 ## Training(GTX1070):
-* Download Pre-trained coco models and place it under directory pretrained/ :<br>
+* Download Pre-trained coco models and place it under directory pretrained/ScaledYOLOV4_p5_coco_pretrain :<br>
    [https://drive.google.com/file/d/1glOCE3Y5Q5enW3rpVq3SmKDXzaKIw4YL/view?usp=sharing](https://drive.google.com/file/d/1glOCE3Y5Q5enW3rpVq3SmKDXzaKIw4YL/view?usp=sharing) <br>
    or<br>
    [https://pan.baidu.com/s/1EBIMaBzEYA7ZT1yuWHmi-w](https://pan.baidu.com/s/1EBIMaBzEYA7ZT1yuWHmi-w) password: 9yc8 
