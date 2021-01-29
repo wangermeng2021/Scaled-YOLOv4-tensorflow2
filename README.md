@@ -67,7 +67,7 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 
  ![](images/chess_evaluation.png "")
 
-## detection
+## Detection
 * For detection on Chess Pieces dataset:
   ```
   python3 detect.py
@@ -76,7 +76,7 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 
   ![](images/chess_detection.png "")
 
-## customzied training
+## Customzied training
 * Convert your dataset to Pascal VOC format(you can use labelImg to generate VOC format dataset)
 * Generate class names file(such as xxx.names)
 * 
