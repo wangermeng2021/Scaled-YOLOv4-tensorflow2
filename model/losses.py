@@ -41,23 +41,7 @@ class Yolov3BoxRegressionLoss():
             # return tf.reduce_sum(tf.abs(scaled_pred_xy - y_true[..., 0:2]) + tf.abs(pred_wh - y_true[..., 2:4]),[1,2,3,4])/pos_num,1
 
             pred_x1y1x2y2 = tf.concat([pred_xy-pred_wh/2, pred_xy+pred_wh/2], axis=-1)
-            # # pred_x1y1x2y2 = tf.clip_by_value(pred_x1y1x2y2,0,1)
-            # print("ssssssssssssssssssss:")
-            # print(pred_x1y1x2y2[y_true[..., 4]>0])
-            # # print(y_pred[..., 5:][y_true[..., 4] > 0])
-            # print(tf.sigmoid(y_pred[..., 4][y_true[..., 4] > 0]))
-            # print("pred_scale",((tf.sigmoid(y_pred[..., 2:4]) * 2) ** 2)[y_true[..., 4] > 0] )
-            # print("pred_wh",pred_wh[y_true[..., 4] > 0],normalized_anchors)
 
-            # print("sig_max:",
-            #       tf.reduce_max(tf.sigmoid(y_pred[..., 4])))
-            # print("sig_num:",tf.reduce_sum(tf.cast(tf.sigmoid(y_pred[..., 4])>0.001,tf.dtypes.float32)))
-            # # print(y_pred[..., 4:5][y_true[..., 4] > 0])
-            # print(tf.sigmoid(y_pred[..., 4][y_true[..., 4] > 0]))
-            # print(tf.reduce_sum(tf.cast(tf.sigmoid(y_pred[..., 4])>0.5,tf.dtypes.float32)))
-            # # return tf.reduce_sum(
-            # #     obj_mask * tf.reduce_sum(tf.square(y_true_x1y1x2y2 - pred_x1y1x2y2), axis=-1),
-            # #     axis=[1, 2, 3])/pos_num, 1
 
 
             #iou
@@ -144,7 +128,7 @@ class Yolov3ObjectLoss():
             object_loss_mask = y_true[..., 4]
             # object_loss_ori = tf.keras.losses.binary_crossentropy(y_true[..., 4:5], y_pred[..., 4:5], from_logits=True)
             iou_score = tf.maximum(iou_score, 0)
-            # print("nnnnnnnnnnnnnnnnnn:")
+            #
             # print(iou_score[iou_score>0.5])
             # print(len(iou_score[iou_score>0.5]))
             iou_score = tf.stop_gradient(iou_score)
@@ -224,181 +208,5 @@ def yolov3_loss(args, grid_index):
 
     return loss
 
-#
-# import os
-# os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-# def parse_args(args):
-#     parser = argparse.ArgumentParser(description='Simple training script for using snapmix .')
-#     parser.add_argument('--model-type', default='p5', help="choices=['p5','p6','p7']")
-#     parser.add_argument('--reg-losss-weight', default=1.0)
-#     parser.add_argument('--obj-losss-weight', default=1.0)
-#     parser.add_argument('--cls-losss-weight', default=1.0)
-#
-#     parser.add_argument('--epochs', default=100, type=int)
-#     parser.add_argument('--batch-size', default=16, type=int)
-#
-#     parser.add_argument('--dataset-root-dir', default='/home/wangem1/dataset/VOC2007&2012', type=str, help="voc,coco")
-#     parser.add_argument('--dataset_type', default='voc', type=str, help="voc,coco")
-#     parser.add_argument('--voc_train_set', default=[(2007, 'trainval'), (2012, 'trainval')])
-#     parser.add_argument('--voc_valid_set', default=[(2007, 'test')])
-#     parser.add_argument('--voc_skip_difficult', default=True)
-#     parser.add_argument('--coco_train_set', default='train')
-#     parser.add_argument('--coco_valid_set', default='valid')
-#     parser.add_argument('--num-classes', default=80, help="choices=['p5','p6','p7']")
-#     parser.add_argument('--class_names', default='voc.names', help="choices=['p5','p6','p7']")
-#
-#     parser.add_argument('--augment', default='rand_augment', type=str, help="choices=[random_crop,'mosaic','only_flip_left_right',None]")
-#
-#     parser.add_argument('--multi-scale', default=[416], help="choices=['p5','p6','p7']")
-#
-#     parser.add_argument('--start-val-epoch', default=50, type=int)
-#
-#     parser.add_argument('--optimizer', default='adam', help="choices=[adam,sgd]")
-#     parser.add_argument('--momentum', default=0.9, help="choices=[sgd,'p6','p7']")
-#     parser.add_argument('--nesterov', default=True, help="choices=[sgd,'p6','p7']")
-#     parser.add_argument('--weight_decay', default=True, help="")
-#
-#     parser.add_argument('--lr-scheduler', default='step', type=str, help="choices=['step','warmup_cosinedecay']")
-#     parser.add_argument('--init-lr', default=1e-3, type=float)
-#     parser.add_argument('--lr-decay', default=0.1, type=float)
-#     parser.add_argument('--lr-decay-epoch', default=[80, 150, 180], type=int)
-#     parser.add_argument('--warmup-lr', default=1e-4, type=float)
-#     parser.add_argument('--warmup-epochs', default=0, type=int)
-#     parser.add_argument('--weight-decay', default=1e-4, type=float)
-#
-#     parser.add_argument('--transfer-type', default='csp_darknet53_and_pan', help="choices=['p5','p6','p7']")#choices=['csp_darknet53','csp_darknet53_and_pan',None]
-#     parser.add_argument('--pretrained-weights', default='p5', help="choices=['p5','p6','p7']")
-#     parser.add_argument('--output-checkpoints-dir', default='p5', help="choices=['p5','p6','p7']")
-#
-#     #los
-#     parser.add_argument('--box-regression-loss', default='giou')#{'giou','diou','ciou'}
-#     parser.add_argument('--classification-loss', default='bce', help="choices=['ce','bce','focal']")#,#
-#     parser.add_argument('--object-loss', default='bce', help="choices=['p5','p6','p7']")
-#     parser.add_argument('--focal-alpha', default= 0.25, help="choices=['p5','p6','p7']")
-#     parser.add_argument('--focal-gamma', default=2.0, help="choices=['p5','p6','p7']")
-#     parser.add_argument('--ignore-thr', default=0.7, help="choices=['p5','p6','p7']")
-#
-#     #postprocess
-#     parser.add_argument('--nms', default=[416], help="choices=['p5','p6','p7']")
-#     parser.add_argument('--max-boxes-num', default=1000, help="choices=['p5','p6','p7']")
-#     parser.add_argument('--nms-iou-threshold', default=1000, help="choices=['p5','p6','p7']")
-#     parser.add_argument('--score-threshold', default=[416], help="choices=['p5','p6','p7']")
-#     parser.add_argument('--pre-nms-num-boxes', default=1000, help="choices=['p5','p6','p7']")
-#
-#     parser.add_argument('--label-smooth', default=0.0)
-#     parser.add_argument('--scales-x-y', default=[2., 2., 2.], help="choices=['p5','p6','p7']")
-#
-#     parser.add_argument('--anchor-match-type', default='iou',help="choices=['iou','wh_ratio']")
-#     parser.add_argument('--anchor-match-iou_thr', default=0.5, help="choices=['p5','p6','p7']")
-#     parser.add_argument('--anchor-match-wh-ratio-thr', default=4.0)
-#
-#     return parser.parse_args(args)
-#
-# import argparse
-# import sys
-# if __name__ == "__main__":
-#     args = parse_args(sys.argv[1:])
-#
-#     while True:
-#         a1 = np.random.uniform(0, 0.4, size=[1, 52, 52, 4, 6]).astype(np.float32)
-#         a2 = np.random.uniform(0, 0.4, size=[1, 52, 52, 4, 6]).astype(np.float32)
-#         loss1 = yolov3_loss(args,0)(a1,a2)
-#         loss2 = yolov3_loss(args, 1)(a1, a2)
-#         loss3 = yolov3_loss(args, 2)(a1, a2)
-#         print(tf.reduce_sum(loss1))
-#         print(tf.reduce_sum(loss2))
-#         print(tf.reduce_sum(loss3))
-#
-#
-#
 
-# from config.param_config import CFG
-# import numpy as np
-# np.random.seed(1123)
-# a1 = np.random.uniform(0, 0.4, size=[2,52,52,3,2]).astype(np.float32)
-# np.random.seed(1233)
-# a11 = np.random.uniform(0.5, 0.9, size=[2,52,52,3,2]).astype(np.float32)
-# np.random.seed(123)
-# a111 = np.random.uniform(size=[2,52,52,3,1]).astype(np.float32)
-# a111 = a111+0.01>1.
-#
-# np.random.seed(1213)
-# a1111 = np.random.uniform(size=[2,52,52,3,2]).astype(np.float32)
-# a1 = np.concatenate([a1, a11, a111, a1111],axis=-1)
-#
-# np.random.seed(4156)
-# a2 = np.random.uniform(size=[2,52,52,3,5+2]).astype(np.float32)
-#
-#
-# # a3 = yolov3_loss(CFG,0)(a1,a2)
-# # print(a3)
-# # exit()
-#
-#
-#
-#
-# # print(tf.boolean_mask(x1, x2))
-# # exit()
-# # a1 = np.ones(shape=[1,2,2,3,5+2]).astype(np.float32)
-# # a2 = np.ones(shape=[1,2,2,3,5+2]).astype(np.float32)
-# # o1 = Yolov3ObjectLoss.bce(CFG,0)(a1,a2)
-#
-# # print(o1)
-# # exit()
-# # regression_loss = Yolov3BoxRegressionLoss().mse(CFG,0)(a1,a2)
-# # regression_loss = Yolov3BoxRegressionLoss().bce_and_l1loss(CFG,0)(a1,a2)
-# regression_loss = Yolov3BoxRegressionLoss().ciou(CFG,0)(a1,a2)
-# print(regression_loss)
-# # print(CFG['anchors'])
-# exit()
-#
-#
-#
-#
-# np.random.seed(121)
-# a1 = np.random.randint(low=0,high=2,size=[3,52,52,3,5+2]).astype(np.int32).astype(np.float32)
-# np.random.seed(82)
-# a2 = np.random.uniform(0, 1., size=[3,52,52,3,5+2]).astype(np.float32)
-#
-# classification_loss = Yolov3ClassificationLoss().focal_loss(CFG,0)(a1,a2)
-# classification_loss = Yolov3ClassificationLoss.bce(CFG,0)(a1,a2)
-# classification_loss = Yolov3ClassificationLoss.ce(CFG,0)(a1,a2)
-# print(classification_loss)
-# # print(a1)
-# # print(a2)
-# # print(a1*CFG['anchors'][0])
-#
-#
-# #
-# # np.random.seed(1123)
-# # a1 = np.random.randint(low=0,high=2,size=[1,1,1,3,2]).astype(np.int32).astype(np.float32)
-# #
-# # np.random.seed(23)
-# # a2 = np.random.uniform(0, 1., size=[1,1,1,3,2]).astype(np.float32)
-# # classification_loss = Yolov3ClassificationLoss().focal_loss(CFG,0)(a1,a2)
-# # # print(a1)
-# # # print(a2)
-# # print(classification_loss)
-# #
-# #
-# # np.random.seed(121123)
-# # a1 = np.random.randint(low=0,high=2,size=[1,1,1,3,2]).astype(np.int32).astype(np.float32)
-# # np.random.seed(23123)
-# # a2 = np.random.uniform(0, 1., size=[1,1,1,3,2]).astype(np.float32)
-# # classification_loss = Yolov3ClassificationLoss().focal_loss(CFG,0)(a1,a2)
-# # # print(a1)
-# # # print(a2)
-# # print(classification_loss)
-#
-#
-#
-# # print(CFG['anchors'])
-# # #test
-# # import numpy as np
-# # a1 = np.array([[[1,2,3.0]],[[4,5,6]]])
-# # a2 = np.array([[[1,2,3.0]],[[4,5,6]]])
-# # print(a1[...,0:1])
-# # out1 = tf.keras.losses.binary_crossentropy(a1[...,0:1],a1[...,0:1])
-# # print(out1.shape)
-# # print(out1)
 

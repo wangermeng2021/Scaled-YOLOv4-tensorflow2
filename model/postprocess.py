@@ -24,31 +24,8 @@ def postprocess(outputs, args):
         else:
             scores = output[..., 4:5] * output[..., 5:]
 
-        # tf.print("tensors_1:", output[...,4][output[...,4] >0.5], output_stream=sys.stdout)
-        # print(output[...,4][output[...,4] >0.5])
-        # print(tf.reduce_max(scores,axis=-1)[tf.reduce_max(scores,axis=-1)>0.8])
 
-        # if tf.shape(tf.reduce_max(scores, axis=-1)[tf.reduce_max(scores, axis=-1) > 0.8])[0]>0:
-        #     print("jjjjjjjjjjjjjjjjjjjjjj")
-        #     print(tf.reduce_max(scores, axis=-1)[tf.reduce_max(scores, axis=-1) > 0.8])
-        #     print(decoded_boxes[])
         scores = tf.reshape(scores, [tf.shape(scores)[0], -1, tf.shape(scores)[-1]])
-
-        # print(tf.reduce_max(scores, axis=-1)[tf.reduce_max(scores, axis=-1) > 0.5])
-        # print(tf.argmax(scores, axis=-1)[tf.reduce_max(scores, axis=-1) > 0.5])
-        # print(decoded_boxes[tf.reduce_max(scores, axis=-1) > 0.5])
-        # tf.print("tensors_2:", tf.argmax(scores, axis=-1)[tf.reduce_max(scores, axis=-1) > 0.5], output_stream=sys.stdout)
-
-        # print(tf.reduce_max(scores, axis=-1)[tf.reduce_max(scores, axis=-1) > 0.5])
-        # print(decoded_boxes[tf.reduce_max(scores, axis=-1) > 0.5])
-        # print("jjjjjjjjjjjjjjjjjjjjjj")
-        # print(tf.reduce_max(scores, axis=-1)[tf.reduce_max(scores, axis=-1) > 0.8])
-        # print(tf.shape(tf.reduce_max(scores, axis=-1)[tf.reduce_max(scores, axis=-1) > 0.8])[0])
-        # if tf.shape(tf.reduce_max(scores, axis=-1)[tf.reduce_max(scores, axis=-1) > 0.8])[0]>0:
-        #     print("jjjjjjjjjjjjjjjjjjjjjj")
-        #     print(tf.reduce_max(scores, axis=-1)[tf.reduce_max(scores, axis=-1) > 0.8])
-        #     print(decoded_boxes[tf.reduce_max(scores, axis=-1) > 0.8])
-
 
         boxes_list.append(decoded_boxes)
         scores_list.append(scores)
@@ -69,44 +46,3 @@ def postprocess(outputs, args):
     # return boxes, scores, classes, valid_detections
 
 
-
-
-
-
-#
-# #test
-# import numpy as np
-# a1 = np.array([[1,2,3],[5,61,7]])
-# a21,a22 = tf.math.top_k(a1,2)
-#
-# b1 = np.array([[[1,2],[3,4],[5,6]],
-#                [[11,22],[33,44],[55,66]]])
-#
-#
-# print(b1)
-# print(a22)
-# print(tf.gather(b1,a22, batch_dims=1))
-# exit()
-# indices = [[1], [0]]
-# params = [[[1, 2],[11, 22]], [[3, 4],[5, 6]]]
-#
-# s1 = tf.gather_nd(params,indices)
-# print(s1)
-#
-#
-# exit()
-#
-# b1 = np.array([[[1,1,1,1],[2,2,2,2],[3,3,3,3]],
-#                [[8,8,8,8],[7,7,7,7],[6,6,6,6]]])
-#
-# a22 = a22.numpy()
-# print(a22)
-# # a22 =np.expand_dims(a22,axis=-1)
-# # print(a22)
-# # print(b1)
-# # print(b1[a22])
-# # print(b1.shape)
-# # print(a22.shape)
-# print(b1.shape)
-# print(a22.shape)
-# # print(a22)

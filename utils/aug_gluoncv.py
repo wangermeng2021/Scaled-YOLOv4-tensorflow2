@@ -90,31 +90,3 @@ class YOLO3DefaultTrainTransform(object):
         bbox = tbbox.flip(bbox, (w, h), flip_x=flips[0])
         # print("s2:", bbox)
         return img,bbox
-
-#
-# import os
-# os.environ['CUDA_VISIBLE_DEVICES']='-1'
-# cv_img = cv2.imread('/home/wangem1/t1.jpg')
-# cv_img = cv2.resize(cv_img, (416, 416))
-# cv2.rectangle(cv_img,(1,1),(50,50),(255,0,0))
-# cv2.imshow("d1",cv_img)
-#
-#
-# sss = YOLO3DefaultTrainTransform(416,416)
-# while True:
-#     img,box = sss(cv_img,np.array([[1,1,50,50,3]]))
-#     cv2.rectangle(img,(box[0][0],box[0][1]),(box[0][2],box[0][3]),(255,0,0))
-#     cv2.imshow("d2",img)
-#     cv2.waitKey(0)
-
-#
-# image_group  = np.expand_dims(cv_img,axis=0)
-# annotations_group=[{'bboxes':[[50,50,200,200]],'labels':[1]}]
-#
-# boxes_and_labels = np.concatenate([annotations_group[0]['bboxes'],
-#                                    np.expand_dims(annotations_group[0]['labels'], 0)], axis=-1)
-# print(boxes_and_labels)
-# image_group[0], boxes_and_labels = sss(image_group[0], boxes_and_labels)
-#
-# # annotations_group[0]['bboxes'] = boxes_and_labels[:, 0:4]
-# # annotations_group[0]['labels'] = boxes_and_labels[:, 4]

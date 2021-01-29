@@ -6,28 +6,6 @@ def conv2d_bn_mish(x, filters, kernel_size, strides=(1,1), padding='same',name=N
     x = tf.keras.layers.BatchNormalization(name=name+"_batch_normalization")(x)
     return x * tf.math.tanh(tf.math.softplus(x))
 
-#
-# # from tensorflow.keras import backend as K
-# # tf.random.set_seed(123)
-# # x = tf.random.uniform([1,3,3,2])
-# # x1 = conv2d_bn_mish(x,3,(3,3))
-# # print(x1)
-#
-# tf.random.set_seed(123)
-# import numpy as np
-# input = tf.keras.layers.Input((5,5,1))
-# ddd = np.ones((1,5,5,1))
-# ddd = tf.keras.layers.ZeroPadding2D(((1,0),(1,0)))(ddd)
-# output = conv2d_bn_mish(ddd,1, (3, 3), strides=(2, 2), padding='valid')
-# # output = tf.keras.layers.Conv2D(1, (3, 3), strides=(2, 2), padding='valid', use_bias=False,
-# #                            kernel_regularizer=tf.keras.regularizers.l2(5e-4))(ddd)
-#
-# # output = tf.keras.layers.Conv2D(1, (3, 3), (2, 2), 'valid', use_bias=False, kernel_regularizer=tf.keras.regularizers.l2(5e-4))(ddd)
-# # model = tf.keras.Model(input,output)
-# # model.summary()
-# # ddd = tf.ones_like(input)
-#
-# print(output)
 
 def scaled_yolov4_csp_block(x, filters, num_block = 3, type="backbone",name=None):
 

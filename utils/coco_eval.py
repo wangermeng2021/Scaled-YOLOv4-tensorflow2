@@ -83,19 +83,4 @@ class CocoEvalidation():
         summary_metrics, _ = evaluator.ComputeMetrics()
         return summary_metrics
 #
-# #test
 
-# class_names=['car1','car2','car3']
-# groundtruth_boxes = np.array([[[0,0,50.,50],[100,100,150,150]]])
-# groundtruth_classes = np.array([[0,1]])
-# groundtruth_valids = np.array([2])
-# detection_boxes = np.array([[[0,0,50.,50],[100,100,150,150]]])
-# detection_classes = np.array([[0,1]])
-# detection_valids = np.array([1])
-# detection_scores = np.array([[0.1,0.9]])
-# coco = CocoEvalidation(groundtruth_boxes,groundtruth_classes,groundtruth_valids,class_names)
-#
-# result = coco.get_coco_mAP(detection_boxes,detection_scores,detection_classes,detection_valids)
-# import tensorflow as tf
-# aaa = tf.test.TestCase()
-# aaa.assertAlmostEqual(1.0, result['Precision/mAP'])

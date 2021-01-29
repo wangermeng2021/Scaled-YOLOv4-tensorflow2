@@ -9,9 +9,3 @@ def spp(x):
     spp_result = conv2d_bn_mish(spp_result, x.shape[3], (1, 1))
     return spp_result
 
-#
-# #test
-# x = tf.random.uniform([1,13,13,2])
-# x1 = spp(x)
-# print(x)
-# print(x1)
