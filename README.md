@@ -86,6 +86,6 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 ## References
 * [https://github.com/WongKinYiu/ScaledYOLOv4](https://github.com/WongKinYiu/ScaledYOLOv4)
 * [https://github.com/ultralytics/yolov5](https://github.com/ultralytics/yolov5)
-* [https://github.com/tensorflow/models](https://github.com/tensorflow/models)
+* [https://github.com/dmlc/gluon-cv](https://github.com/dmlc/gluon-cv)
 
 
