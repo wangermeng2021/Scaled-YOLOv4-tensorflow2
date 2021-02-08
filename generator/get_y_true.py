@@ -14,17 +14,22 @@ from utils.anchors import yolo_anchors
 
 def get_y_true(max_side, batch_boxes, groundtruth_valids, args):
 
-
+    if args.model_type == 'tiny':
+        detect_layer_num = 2
+        strides = [16 * 2 ** i for i in range(detect_layer_num)]
     if args.model_type == 'p5':
         detect_layer_num = 3
+        strides = [8 * 2 ** i for i in range(detect_layer_num)]
     if args.model_type == 'p6':
         detect_layer_num = 4
+        strides = [8 * 2 ** i for i in range(detect_layer_num)]
     if args.model_type == 'p7':
         detect_layer_num = 5
-    strides = [8*2**i for i in range(detect_layer_num)]
+        strides = [8 * 2 ** i for i in range(detect_layer_num)]
+
     offset = 0.5
 
-    class_num = args.num_classes
+    class_num = int(args.num_classes)
     batch_size = batch_boxes.shape[0]
     grid_size = max_side//np.array(strides).astype(np.int32)
 
@@ -46,11 +51,28 @@ def get_y_true(max_side, batch_boxes, groundtruth_valids, args):
     matched_anchor_num = np.expand_dims(matched_anchor_num, axis=-1)
     batch_boxes = np.concatenate([batch_boxes, matched_anchor_index,matched_anchor_num], axis=-1)
 
-
-    grids_0 = np.zeros([batch_size, grid_size[0], grid_size[0], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
-    grids_1 = np.zeros([batch_size, grid_size[1], grid_size[1], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
-    grids_2 = np.zeros([batch_size, grid_size[2], grid_size[2], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
-    grids = [grids_0, grids_1, grids_2]
+    if args.model_type=='tiny':
+        grids_0 = np.zeros([batch_size, grid_size[0], grid_size[0], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_1 = np.zeros([batch_size, grid_size[1], grid_size[1], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids = [grids_0, grids_1]
+    elif args.model_type=='p5':
+        grids_0 = np.zeros([batch_size, grid_size[0], grid_size[0], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_1 = np.zeros([batch_size, grid_size[1], grid_size[1], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_2 = np.zeros([batch_size, grid_size[2], grid_size[2], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids = [grids_0, grids_1, grids_2]
+    elif args.model_type=='p6':
+        grids_0 = np.zeros([batch_size, grid_size[0], grid_size[0], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_1 = np.zeros([batch_size, grid_size[1], grid_size[1], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_2 = np.zeros([batch_size, grid_size[2], grid_size[2], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_3 = np.zeros([batch_size, grid_size[3], grid_size[3], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids = [grids_0, grids_1, grids_2, grids_3]
+    else :
+        grids_0 = np.zeros([batch_size, grid_size[0], grid_size[0], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_1 = np.zeros([batch_size, grid_size[1], grid_size[1], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_2 = np.zeros([batch_size, grid_size[2], grid_size[2], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_3 = np.zeros([batch_size, grid_size[3], grid_size[3], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_4 = np.zeros([batch_size, grid_size[4], grid_size[4], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids = [grids_0, grids_1, grids_2, grids_3, grids_4]
 
     for batch_index in range(batch_size):
         for box_index in range(groundtruth_valids[batch_index]):
@@ -108,13 +130,19 @@ def get_y_true(max_side, batch_boxes, groundtruth_valids, args):
 
 
 def get_y_true_with_one_class(max_side, batch_boxes, groundtruth_valids, args):
+    if args.model_type == 'tiny':
+        detect_layer_num = 2
+        strides = [16 * 2 ** i for i in range(detect_layer_num)]
     if args.model_type == 'p5':
         detect_layer_num = 3
+        strides = [8 * 2 ** i for i in range(detect_layer_num)]
     if args.model_type == 'p6':
         detect_layer_num = 4
+        strides = [8 * 2 ** i for i in range(detect_layer_num)]
     if args.model_type == 'p7':
         detect_layer_num = 5
-    strides = [8*2**i for i in range(detect_layer_num)]
+        strides = [8 * 2 ** i for i in range(detect_layer_num)]
+
     offset = 0.5
     # class_num = args.num_classes
     class_num = 0
@@ -132,7 +160,7 @@ def get_y_true_with_one_class(max_side, batch_boxes, groundtruth_valids, args):
         batch_boxes_wh = batch_boxes[..., 2:4] - batch_boxes[..., 0:2]
         batch_boxes_wh = batch_boxes_wh[:, :,None]
         # print(batch_boxes_wh)
-        wh_ratio = anchors_wh/batch_boxes_wh
+        wh_ratio = anchors_wh/(batch_boxes_wh+1e-7)
         wh_ratio = np.max(np.maximum(wh_ratio, 1./wh_ratio),axis=-1)
         matched_anchor_index = np.argsort(wh_ratio, axis=-1)
         matched_anchor_num = np.sum(wh_ratio < args.anchor_match_wh_ratio_thr, axis=-1)
@@ -140,23 +168,41 @@ def get_y_true_with_one_class(max_side, batch_boxes, groundtruth_valids, args):
     matched_anchor_num = np.expand_dims(matched_anchor_num, axis=-1)
     batch_boxes = np.concatenate([batch_boxes, matched_anchor_index,matched_anchor_num], axis=-1)
 
-    if args.model_type=='p5':
-        grids_0 = np.zeros([batch_size, grid_size[0], grid_size[0], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
-        grids_1 = np.zeros([batch_size, grid_size[1], grid_size[1], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
-        grids_2 = np.zeros([batch_size, grid_size[2], grid_size[2], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+    if args.model_type == 'tiny':
+        grids_0 = np.zeros(
+            [batch_size, grid_size[0], grid_size[0], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_1 = np.zeros(
+            [batch_size, grid_size[1], grid_size[1], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids = [grids_0, grids_1]
+    elif args.model_type == 'p5':
+        grids_0 = np.zeros(
+            [batch_size, grid_size[0], grid_size[0], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_1 = np.zeros(
+            [batch_size, grid_size[1], grid_size[1], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_2 = np.zeros(
+            [batch_size, grid_size[2], grid_size[2], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
         grids = [grids_0, grids_1, grids_2]
-    elif args.model_type=='p6':
-        grids_0 = np.zeros([batch_size, grid_size[0], grid_size[0], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
-        grids_1 = np.zeros([batch_size, grid_size[1], grid_size[1], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
-        grids_2 = np.zeros([batch_size, grid_size[2], grid_size[2], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
-        grids_3 = np.zeros([batch_size, grid_size[3], grid_size[3], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+    elif args.model_type == 'p6':
+        grids_0 = np.zeros(
+            [batch_size, grid_size[0], grid_size[0], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_1 = np.zeros(
+            [batch_size, grid_size[1], grid_size[1], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_2 = np.zeros(
+            [batch_size, grid_size[2], grid_size[2], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_3 = np.zeros(
+            [batch_size, grid_size[3], grid_size[3], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
         grids = [grids_0, grids_1, grids_2, grids_3]
-    else :
-        grids_0 = np.zeros([batch_size, grid_size[0], grid_size[0], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
-        grids_1 = np.zeros([batch_size, grid_size[1], grid_size[1], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
-        grids_2 = np.zeros([batch_size, grid_size[2], grid_size[2], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
-        grids_3 = np.zeros([batch_size, grid_size[3], grid_size[3], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
-        grids_4 = np.zeros([batch_size, grid_size[4], grid_size[4], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+    else:
+        grids_0 = np.zeros(
+            [batch_size, grid_size[0], grid_size[0], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_1 = np.zeros(
+            [batch_size, grid_size[1], grid_size[1], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_2 = np.zeros(
+            [batch_size, grid_size[2], grid_size[2], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_3 = np.zeros(
+            [batch_size, grid_size[3], grid_size[3], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
+        grids_4 = np.zeros(
+            [batch_size, grid_size[4], grid_size[4], len(yolo_anchors[args.model_type][0]), 5 + class_num], np.float32)
         grids = [grids_0, grids_1, grids_2, grids_3, grids_4]
 
     for batch_index in range(batch_size):

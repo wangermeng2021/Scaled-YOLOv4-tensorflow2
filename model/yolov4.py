@@ -5,8 +5,6 @@ import tensorflow as tf
 from model.CSPDarknet53 import scaled_yolov4_csp_darknet53
 from model.head import head
 from model.yolo_head import yolov3_head
-
-
 from model.postprocess import postprocess
 def Yolov4(args, training=True):
     input = tf.keras.layers.Input((None, None, 3))

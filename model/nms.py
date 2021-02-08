@@ -14,7 +14,7 @@ class NonMaxSuppression():
             max_output_size_per_class=params.nms_max_box_num,
             max_total_size=params.nms_max_box_num,
             iou_threshold=params.nms_iou_threshold,
-            score_threshold=params.score_threshold
+            nms_score_threshold=params.nms_score_threshold
         )
         return boxes, scores, classes, valid_detections
     @staticmethod
@@ -31,7 +31,7 @@ class NonMaxSuppression():
          """
 
         iou_threshold = params.nms_iou_threshold
-        score_threshold =  params.score_threshold
+        nms_score_threshold =  params.nms_score_threshold
         nms_max_box_num =  params.nms_max_box_num
 
         batch_classes = np.argmax(batch_scores, axis=-1)
@@ -51,7 +51,7 @@ class NonMaxSuppression():
 
             classes = batch_classes[batch_index]
 
-            valid_mask = scores > score_threshold
+            valid_mask = scores > nms_score_threshold
 
             if np.sum(valid_mask) == 0:
                 batch_result_boxes[batch_index] = np.zeros([nms_max_box_num, 4])
@@ -127,7 +127,7 @@ class NonMaxSuppression():
          """
 
         iou_threshold = params.nms_iou_threshold
-        score_threshold = params.score_threshold
+        nms_score_threshold = params.nms_score_threshold
         nms_max_box_num = params.nms_max_box_num
 
         batch_classes = np.argmax(batch_scores, axis=-1)
@@ -144,10 +144,9 @@ class NonMaxSuppression():
             # print(batch_result_boxes[0])
             boxes = batch_boxes[batch_index]
             scores = batch_scores[batch_index]
-
             classes = batch_classes[batch_index]
 
-            valid_mask = scores > score_threshold
+            valid_mask = scores > nms_score_threshold
 
             if np.sum(valid_mask) == 0:
                 batch_result_boxes[batch_index] = np.zeros([nms_max_box_num, 4])
@@ -219,7 +218,7 @@ class NonMaxSuppression():
          """
 
         iou_threshold = params.nms_iou_threshold
-        score_threshold = params.score_threshold
+        nms_score_threshold = params.nms_score_threshold
         nms_max_box_num = params.nms_max_box_num
 
         # batch_classes = np.argmax(batch_scores, axis=-1)
@@ -233,13 +232,13 @@ class NonMaxSuppression():
         batch_result_valid = np.empty([batch_size],dtype=np.int32)
 
         for batch_index in range(batch_size):
-            # print(batch_result_boxes[0])
+
             boxes = batch_boxes[batch_index]
             scores = batch_scores[batch_index]
 
             classes = batch_classes[batch_index]
 
-            valid_mask = scores > score_threshold
+            valid_mask = scores > nms_score_threshold
 
             if np.sum(valid_mask) == 0:
                 batch_result_boxes[batch_index] = np.zeros([nms_max_box_num, 4])

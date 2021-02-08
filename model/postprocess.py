@@ -5,9 +5,11 @@ from model.box_coder import box_decode
 from model.nms import NonMaxSuppression
 from model.nms import yolov4_nms
 import sys
+
+
 def postprocess(outputs, args):
 
-    num_classes = args.num_classes
+    num_classes = int(args.num_classes)
     if num_classes == 1:
         num_classes = 0
 
@@ -17,7 +19,6 @@ def postprocess(outputs, args):
         output = tf.reshape(output, [tf.shape(output)[0], tf.shape(output)[1], tf.shape(output)[2], -1,
                                      5 + num_classes])
         output = tf.sigmoid(output)
-        # print("oooooooooo:", tf.reduce_max(output[..., 4]))
         decoded_boxes = box_decode(output[..., 0:4], args, index)
         if num_classes == 0:
             scores = output[..., 4:5]
@@ -29,8 +30,8 @@ def postprocess(outputs, args):
 
         boxes_list.append(decoded_boxes)
         scores_list.append(scores)
-    decoded_boxes = tf.concat(boxes_list, axis=-2)
-    scores = tf.concat(scores_list, axis=-2)
+    decoded_boxes = tf.concat(boxes_list, axis=-2,name='output_boxes')
+    scores = tf.concat(scores_list, axis=-2,name='output_scores')
     return decoded_boxes, scores
     max_scores = tf.math.reduce_max(scores, axis=-1)
     pre_nms_values, pre_nms__indices = tf.math.top_k(max_scores, args.pre_nms_num_boxes)

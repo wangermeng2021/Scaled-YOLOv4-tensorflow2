@@ -9,21 +9,16 @@ from PIL import Image
 
 
 def preprocess(img, boxes, style=0):
-    #图像归一化
+    
     if style == 0:
         img = img/255.
     elif style == 1:#tensorflow
         img = img / 127.5 - 1.0
     else:#caffe,bgr
         img -= [123.68,116.779,103.939]
-    #坐标归一化,0-1
-    # print(np.tile(img[0].shape[0:2][::-1], [2]))
-    # print(boxes[:, 0:4])
-    # print("ddd:",img.shape)
-    # print(boxes[..., 0:4])
+        
     boxes[..., 0:4] /= np.tile(img[0].shape[0:2][::-1], [2])
     return img.copy(), boxes.copy()
-
 
 def resize_img_aug(img,dst_size):
     img_wh = img.shape[0:2][::-1]

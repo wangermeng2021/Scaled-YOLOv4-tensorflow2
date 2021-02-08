@@ -13,6 +13,11 @@ class Yolov3BoxRegressionLoss():
     def ciou(args, grid_index, type):
         def loss(y_true, y_pred):
 
+            if args.model_type=='tiny':
+                stride_base = 16
+            else:
+                stride_base = 8
+
             obj_mask = y_true[..., 4]
             pos_num = tf.reduce_sum(obj_mask,axis=[1,2,3])
             pos_num = tf.maximum(pos_num, 1)
@@ -35,7 +40,7 @@ class Yolov3BoxRegressionLoss():
             #     8 * (2 ** grid_index) *tf.shape(y_true)[1:3][::-1], tf.dtypes.float32)
             # pred_wh = (tf.sigmoid(y_pred[..., 2:4]) * 2) ** 2 * normalized_anchors
             normalized_anchors = tf.cast(yolo_anchors[args.model_type][grid_index], tf.dtypes.float32) / tf.cast(
-                8 * (2 ** grid_index), tf.dtypes.float32)
+                stride_base * (2 ** grid_index), tf.dtypes.float32)
             pred_wh = (tf.sigmoid(y_pred[..., 2:4]) * 2) ** 2 * normalized_anchors
 
             # return tf.reduce_sum(tf.abs(scaled_pred_xy - y_true[..., 0:2]) + tf.abs(pred_wh - y_true[..., 2:4]),[1,2,3,4])/pos_num,1
@@ -128,9 +133,6 @@ class Yolov3ObjectLoss():
             object_loss_mask = y_true[..., 4]
             # object_loss_ori = tf.keras.losses.binary_crossentropy(y_true[..., 4:5], y_pred[..., 4:5], from_logits=True)
             iou_score = tf.maximum(iou_score, 0)
-            #
-            # print(iou_score[iou_score>0.5])
-            # print(len(iou_score[iou_score>0.5]))
             iou_score = tf.stop_gradient(iou_score)
             object_loss_ori = tf.keras.losses.binary_crossentropy(tf.expand_dims(iou_score,axis=-1),
                                                                   y_pred[..., 4:5], from_logits=True)
@@ -180,14 +182,15 @@ def yolov3_loss(args, grid_index):
 
     def loss(y_true, y_pred):
 
-        model_obj_loss_layers_weights={"p5":[4.0, 1.0, 0.4],
-                       "p6": [4.0, 1.0, 0.4, 0.1],
-                       "p7": [4.0, 1.0, 0.5, 0.4, 0.1]}
+        model_obj_loss_layers_weights={
+            "tiny": [4.0, 1.0],
+            "p5":[4.0, 1.0, 0.4],
+            "p6": [4.0, 1.0, 0.4, 0.1],
+            "p7": [4.0, 1.0, 0.5, 0.4, 0.1]}
         obj_loss_layers_weights = model_obj_loss_layers_weights[args.model_type][grid_index]
 
         detect_layer_num = len(model_obj_loss_layers_weights[args.model_type])
         model_loss_scale = 3 / detect_layer_num
-
         box_reg_losss_weight = args.reg_losss_weight * model_loss_scale
         obj_losss_weight = args.obj_losss_weight * model_loss_scale * (1.4 if detect_layer_num >= 4 else 1.)
         cls_losss_weight = args.cls_losss_weight * model_loss_scale
@@ -196,9 +199,8 @@ def yolov3_loss(args, grid_index):
         obj_loss = object_loss(y_true, y_pred, iou_score)*obj_loss_layers_weights
         cls_loss = classification_loss(y_true, y_pred)
 
-        #
-        # return box_reg_loss+obj_loss
-        if args.num_classes == 1:
+
+        if int(args.num_classes) == 1:
             # print("\n")
             # print("loss1:", box_reg_loss)
             # print("loss2:", obj_loss)

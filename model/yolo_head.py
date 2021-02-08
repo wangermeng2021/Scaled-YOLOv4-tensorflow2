@@ -1,11 +1,10 @@
 
-
 import tensorflow as tf
 from model.common import conv2d_bn_mish
 from utils.anchors import yolo_anchors
 def yolov3_head(inputs, args):
 
-    class_num = args.num_classes
+    class_num = int(args.num_classes)
     if class_num == 1:
         class_num = 0
     anchors = yolo_anchors[args.model_type]

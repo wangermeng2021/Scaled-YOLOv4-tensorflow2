@@ -11,8 +11,11 @@ def box_decode(encoded_pred_boxes, args, grid_index):
     :return: decoded boxes, shape is [batch,N,4]
     '''
 
+    if args.model_type == 'tiny':
+        stride = 16 * 2 ** grid_index
+    else:
+        stride = 8 * 2 ** grid_index
 
-    stride = 8 * 2 ** grid_index
     (batch_size, grid_height, grid_width) = tf.shape(encoded_pred_boxes)[0:3]
     normalized_anchors = tf.cast(yolo_anchors[args.model_type][grid_index],tf.dtypes.float32)/tf.cast(tf.shape(encoded_pred_boxes)[1:3]*stride,tf.dtypes.float32)
 

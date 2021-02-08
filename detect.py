@@ -4,37 +4,24 @@ import os
 import cv2
 import numpy as np
 import argparse
-from model.yolov4 import Yolov4
-from model.nms import yolov4_nms
-from model.nms import NonMaxSuppression
+from model.nms import yolov4_nms,NonMaxSuppression
 from utils.preprocess import resize_img
 import random
 import albumentations as A
 
-tta_transform_1 = A.Compose([
-    A.HorizontalFlip(p=1.),
-    A.RandomBrightnessContrast(p=0.2),
-])
-tta_transform_2 = A.Compose([
-    A.RandomBrightnessContrast(p=0.2),
-])
 def parse_args(args):
     parser = argparse.ArgumentParser("test model")
-    parser.add_argument('--model-type', default='p5', help="choices=['p5','p6','p7']")
-    parser.add_argument('--num-classes', default=12)
-    parser.add_argument('--pic-dir',default='images/chess_test_set')
-    parser.add_argument('--weight-path', default='checkpoints/scaled_yolov4_best_62_0.982')
+    parser.add_argument('--class-names', default='dataset/pothole.names')
+    parser.add_argument('--pic-dir',default='images/pothole_pictures')
+    parser.add_argument('--model-path', default='output_model/pothole/best_p5_0.791')
+
     parser.add_argument('--img-size', default=(416, 416))
     parser.add_argument('--TTA', default=True)
     parser.add_argument('--nms', default='diou_nms', help="choices=['hard_nms','diou_nms']")
-    parser.add_argument('--nms-max-box-num', default=300)
-    parser.add_argument('--nms-iou-threshold', default=0.2)
-    parser.add_argument('--score-threshold', default=0.5)
-    parser.add_argument('--class-names', default='dataset/chess.names')
-    parser.add_argument('--scales-x-y', default=[2., 2., 2., 2., 2.])
+    parser.add_argument('--nms-max-box-num', default=300,type=int)
+    parser.add_argument('--nms-iou-threshold', default=0.2,type=float)
+    parser.add_argument('--nms-score-threshold', default=0.1,type=float)
     return parser.parse_args(args)
-# os.environ['CUDA_VISIBLE_DEVICES'] = "-1"
-
 
 def detect_batch_img(img,model,args):
     img = img / 255
@@ -71,7 +58,6 @@ def tta_nms(boxes,scores,classes,valid_detections,args):
 
 
 def plot_one_box(img, box, color=None, label=None, line_thickness=None):
-    # Plots one bounding box on image img
     tl = line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
     color = color or [random.randint(0, 255) for _ in range(3)]
     c1, c2 = (int(box[0]), int(box[1])), (int(box[2]), int(box[3]))
@@ -85,30 +71,39 @@ def plot_one_box(img, box, color=None, label=None, line_thickness=None):
 
 def plot_boxes(img,boxes,scores,classes,class_names,args):
     for i in range(len(boxes)):
-            if scores[i] < args.score_threshold:
+            if scores[i] < args.nms_score_threshold:
                 continue
             x1y1 = (boxes[i][0:2] * img.shape[0:2][::-1]).astype(np.int)
             x2y2 = (boxes[i][2:4] * img.shape[0:2][::-1]).astype(np.int)
             plot_one_box(img,[x1y1[0],x1y1[1],x2y2[0],x2y2[1]],(255,0,255),label=str(class_names[classes[i]]) + "," + str("%0.2f" % scores[i]))
-            # cv2.rectangle(img, tuple(x1y1), tuple(x2y2), (0, 255, 0), 2)
-            # cv2.putText(img, str(class_names[classes[i]]) + " " + str("%0.2f" % scores[i]),
-            #             (x1y1[0], max(x1y1[1] - 10, 0)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+def get_tta_tranform():
+    out_list=[]
+    tta_transform = A.Compose([
+        A.HorizontalFlip(p=1.),
+        A.RandomBrightnessContrast(p=0.2),
+    ])
+    out_list.append(tta_transform)
+    tta_transform = A.Compose([
+        A.RandomBrightnessContrast(p=0.2),
+    ])
+    out_list.append(tta_transform)
+    return out_list
+
 def main(args):
-    model = Yolov4(args, training=False)
-    model.load_weights(args.weight_path)
+    model = tf.keras.models.load_model(args.model_path)
     with open(args.class_names) as f:
         class_names = f.read().splitlines()
     img_list = os.listdir(args.pic_dir)
 
     for img_name in img_list:
         img = cv2.imread(os.path.join(args.pic_dir, img_name))
-        # img_ori = cv2.resize(img, args.img_size, interpolation=cv2.INTER_CUBIC)
         img_ori,_,_ = resize_img(img, args.img_size)
         img_copy = img_ori.copy()
         aug_imgs = []
         if args.TTA:
-            aug_imgs.append(tta_transform_1(image=img_copy)['image'])
-            aug_imgs.append(tta_transform_2(image=img_copy)['image'])
+            tta_transforms= get_tta_tranform()
+            aug_imgs.append(tta_transforms[0](image=img_copy)['image'])
+            aug_imgs.append(tta_transforms[1](image=img_copy)['image'])
         aug_imgs.append(img_copy)
         batch_img = np.array(aug_imgs)
         boxes,scores,classes,valid_detections = detect_batch_img(batch_img, model,args)
