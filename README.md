@@ -3,8 +3,8 @@
 A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: Scaling Cross Stage Partial Network](https://arxiv.org/abs/2011.08036)
 
 ## Demo
-![](images/pothole_p5_detection_3.png "")
-![](images/chess_p5_detection.png "")
+![pothole_p5_detection_3.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/pothole_p5_detection_3.png)
+![chess_p5_detection.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/chess_p5_detection.png)
 
 ## Features
 - [x] yolov4-tiny
@@ -79,9 +79,9 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 | Scaled-YoloV4-p5(416)                               |              |  0.826  |       |      |
 
 * Evaluation on Pothole dataset: 
-![](images/tensorboard_pothole_p5.png "")
+![tensorboard_pothole_p5.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/tensorboard_pothole_p5.png)
 * Evaluation on chess dataset: 
-![](images/tensorboard_chess_tiny.png "")
+![tensorboard_chess_tiny.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/tensorboard_chess_tiny.png)
 ## Detection
 * For detection on Chess Pieces dataset:
   ```
@@ -89,7 +89,7 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
   ```
   detection result:
 
-  ![](images/chess_p5_detection.png "")
+  ![chess_p5_detection.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/chess_p5_detection.png)
 
 * For detection on Pothole dataset:
   ```
@@ -97,7 +97,7 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
   ```
   detection result:
 
-  ![](images/pothole_p5_detection_2.png "")
+  ![pothole_p5_detection_2.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/pothole_p5_detection_2.png)
 
 
 ## Customzied training
