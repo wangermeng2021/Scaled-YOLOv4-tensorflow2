@@ -23,7 +23,7 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 - [x] support voc dataset format,coco dataset format
 - [x] support transfer learning
 - [x] tensorboard
-- [ ] one stop deployment using tensorflow Serving
+- [x] one stop deployment using tensorflow Serving(very fast)
 - [ ] support tflite
 - [ ] support tensorRT(trt)
 
@@ -107,6 +107,32 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
   ```
   python train.py --use-pretrain True --model-type p5 --dataset-type voc --dataset your_dataset_root_dir --num-classes num_of_classes --class-names path_of_xxx.names --voc-train-set dataset_1,train --voc-val-set dataset_1,val  --epochs 200 --batch-size 8 --multi-scale 416  --augment ssd_random_crop 
   ```
+## Deployment
+TensorFlow Serving is a flexible, high-performance serving system for machine learning models, designed for production environments.it include two parts:clients and server, we can run them on one machine.<br>
+* **Navigate to deployment directory:**
+```
+  cd  deployment/tfserving
+```
+* **Generate a docker image which contains your trained model (it will take minutes，you only have to run it one time):**
+```
+  ./gen_image --model-dir ScaledYOLOv4-tensorflow2/output_model/pothole/best_model_p5_0.811
+```
+* **Deploy model:**<br>
+    * **Server side**( docker and nvidia-docker installed ):
+	
+        ` ./run_image `
+	
+    * **Client side**(no need to install tensorflow):<br>
+        1. install client package
+
+            `   pip install tfservingclient-1.0.0-cp37-cp37m-manylinux1_x86_64.whl   `
+
+
+        2. predict images
+
+            `   python demo.py --pic-dir xxxx --class-names xxx.names   `
+
+
 ## References
 * [https://github.com/WongKinYiu/ScaledYOLOv4](https://github.com/WongKinYiu/ScaledYOLOv4)
 * [https://github.com/ultralytics/yolov5](https://github.com/ultralytics/yolov5)
