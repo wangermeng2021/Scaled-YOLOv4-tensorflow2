@@ -23,7 +23,9 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 - [x] support voc dataset format,coco dataset format
 - [x] support transfer learning
 - [x] tensorboard
-- [x] one stop deployment using tensorflow Serving(very fast)
+- [x] support one-click deployment using tensorflow Serving(very fast)
+- [ ] support one-click deployment for Raspberry Pi 
+- [ ] support one-click deployment for Jetson Xavier NX  
 - [ ] support tflite
 - [ ] support tensorRT(trt)
 
