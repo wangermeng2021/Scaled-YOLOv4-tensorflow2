@@ -35,7 +35,7 @@ def parse_args(args):
 
     parser.add_argument('--epochs', default=300, type=int)
     parser.add_argument('--batch-size', default=16, type=int)
-    parser.add_argument('--start-eval-epoch', default=10, type=int)
+    parser.add_argument('--start-eval-epoch', default=100, type=int)
     parser.add_argument('--eval-epoch-interval', default=1)
     #model
     parser.add_argument('--model-type', default='tiny', help="choices=['tiny','p5','p6','p7']")
