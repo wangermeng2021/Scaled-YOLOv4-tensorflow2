@@ -201,10 +201,6 @@ def yolov3_loss(args, grid_index):
 
 
         if int(args.num_classes) == 1:
-            # print("\n")
-            # print("loss1:", box_reg_loss)
-            # print("loss2:", obj_loss)
-            # print("loss3:", obj_loss_layers_weights)
             return box_reg_losss_weight*box_reg_loss + obj_losss_weight*obj_loss
         return  box_reg_losss_weight*box_reg_loss + obj_losss_weight*obj_loss + cls_losss_weight*cls_loss
 

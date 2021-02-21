@@ -1,34 +1,18 @@
 
 # Scaled-YOLOv4-tensorflow2
 A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: Scaling Cross Stage Partial Network](https://arxiv.org/abs/2011.08036)
+## Update Log
+[2021-02-21] Add support for: model.fit(dramatic improvement in GPU utilization); online coco evaluation callback; change default optimizer from sgd to adam <br><br>
+[2021-02-11] Add support for: one-click deployment using tensorflow Serving(very fast)<br><br>
+[2021-01-29] Add support for: mosaic,ssd_random_crop<br><br>
+[2021-01-25] Add support for: ciou loss,hard-nms,DIoU-nms,label_smooth,transfer learning,tensorboard<br><br>
+[2021-01-23] Add support for: scales_x_y/eliminate grid sensitivity,accumulate gradients for using big batch size,focal loss,diou loss<br><br>
+[2021-01-16] Add support for: warmup,Cosine annealing scheduler,Eager mode training with tf.GradientTape,support voc/coco dataset format<br><br>
+[2021-01-10] Add support for: yolov4-tiny,yolov4-large p5/p6/p7,online coco evaluation,multi scale training<br><br>
 
 ## Demo
 ![pothole_p5_detection_3.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/pothole_p5_detection_3.png)
 ![chess_p5_detection.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/chess_p5_detection.png)
-
-## Features
-- [x] yolov4-tiny
-- [x] yolov4-large p5
-- [x] yolov4-large p6
-- [x] yolov4-large p7
-- [x] online coco evaluation
-- [x] multi scale training
-- [x] accumulate gradients for using big batch size
-- [x] scales_x_y/eliminate grid sensitivity
-- [x] focal loss,diou loss,ciou loss
-- [x] mosaic,ssd_random_crop
-- [x] hard-nms,DIoU-nms
-- [x] label_smooth,warmup,Cosine annealing scheduler
-- [x] Eager mode training with tf.GradientTape
-- [x] support voc dataset format,coco dataset format
-- [x] support transfer learning
-- [x] tensorboard
-- [x] support one-click deployment using tensorflow Serving(very fast)
-- [ ] support one-click deployment for Raspberry Pi 
-- [ ] support one-click deployment for Jetson Xavier NX  
-- [ ] support tflite
-- [ ] support tensorRT(trt)
-
 
 ## Installation
 ###  1. Clone project

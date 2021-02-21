@@ -9,6 +9,8 @@ from utils.preprocess import resize_img
 import random
 import albumentations as A
 
+
+
 def parse_args(args):
     parser = argparse.ArgumentParser("test model")
     parser.add_argument('--class-names', default='dataset/pothole.names')

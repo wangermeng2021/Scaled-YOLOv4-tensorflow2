@@ -16,9 +16,11 @@ import numpy as np
 import webbrowser
 import logging
 from utils.lr_scheduler import get_lr_scheduler
+from tensorflow.keras.callbacks import ReduceLROnPlateau,EarlyStopping,ModelCheckpoint,TensorBoard
+from utils.fit_coco_map import CocoMapCallback
 logging.getLogger().setLevel(logging.ERROR)
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
-np.setbufsize(1e7)
+# np.setbufsize(1e7)
 physical_devices = tf.config.list_physical_devices('GPU')
 if physical_devices:
     tf.config.experimental.set_memory_growth(physical_devices[0], True)
@@ -28,13 +30,16 @@ def parse_args(args):
     #save model
     parser.add_argument('--output-model-dir', default='./output_model')
     #training
+
+    parser.add_argument('--train-mode', default='fit',help="choices=['fit','eager']")
+
     parser.add_argument('--epochs', default=300, type=int)
-    parser.add_argument('--batch-size', default=64, type=int)
+    parser.add_argument('--batch-size', default=16, type=int)
     parser.add_argument('--start-eval-epoch', default=10, type=int)
     parser.add_argument('--eval-epoch-interval', default=1)
     #model
     parser.add_argument('--model-type', default='tiny', help="choices=['tiny','p5','p6','p7']")
-    parser.add_argument('--use-pretrain', default=False, type=bool)
+    parser.add_argument('--use-pretrain', default=True, type=bool)
     parser.add_argument('--tiny-coco-pretrained-weights',
                         default='./pretrain/ScaledYOLOV4_tiny_coco_pretrain/coco_pretrain')
     parser.add_argument('--p5-coco-pretrained-weights',
@@ -55,7 +60,7 @@ def parse_args(args):
     parser.add_argument('--dataset-type', default='voc', help="voc,coco")
     parser.add_argument('--num-classes', default=20)
     parser.add_argument('--class-names', default='voc.names', help="voc.names,coco.names")
-    parser.add_argument('--dataset', default='/home/wangem1/dataset/VOC2007_2012')#
+    parser.add_argument('--dataset', default='/home/wangem1/dataset/VOC2007&2012')#
     parser.add_argument('--voc-train-set', default='VOC2007,trainval,VOC2012,trainval')
     parser.add_argument('--voc-val-set', default='VOC2007,test')
     parser.add_argument('--voc-skip-difficult', default=True)
@@ -77,16 +82,16 @@ def parse_args(args):
         images/train2017
         images/val2017
     '''
-    parser.add_argument('--augment', default='mosaic',help="choices=[None,'only_flip_left_right','ssd_random_crop','mosaic']")
+    parser.add_argument('--augment', default='ssd_random_crop',help="choices=[None,'only_flip_left_right','ssd_random_crop','mosaic']")
     parser.add_argument('--multi-scale', default='416',help="Input data shapes for training, use 320+32*i(i>=0)")#896
     parser.add_argument('--max-box-num-per-image', default=100)
     #optimizer
-    parser.add_argument('--optimizer', default='sgd', help="choices=[adam,sgd]")
+    parser.add_argument('--optimizer', default='adam', help="choices=[adam,sgd]")
     parser.add_argument('--momentum', default=0.9)
     parser.add_argument('--nesterov', default=True)
     parser.add_argument('--weight-decay', default=5e-4)
     #lr scheduler
-    parser.add_argument('--lr-scheduler', default='warmup_cosinedecay', type=str, help="choices=['step','warmup_cosinedecay']")
+    parser.add_argument('--lr-scheduler', default='cosine', type=str, help="choices=['step','warmup_cosinedecay']")
     parser.add_argument('--init-lr', default=1e-3, type=float)
     parser.add_argument('--lr-decay', default=0.1, type=float)
     parser.add_argument('--lr-decay-epoch', default=[160, 180])
@@ -175,85 +180,105 @@ def main(args):
     lr_scheduler = get_lr_scheduler(args)
     optimizer = yolov3_optimizers(args)
 
-    print("loading dataset...")
-    start_time = time.perf_counter()
-    coco_map = EagerCocoMap(pred_generator, model, args)
-    max_coco_map = -1
-    max_coco_map_epoch = -1
-    accumulate_num = args.accumulated_gradient_num
-    accumulate_index = 0
-    accum_gradient = [tf.Variable(tf.zeros_like(this_var)) for this_var in model.trainable_variables]
-
-    best_weight_path = ""
-
     #tensorboard
     open_tensorboard_url = False
     os.system('rm -rf ./logs/')
-    train_writer = tf.summary.create_file_writer("logs/train")
-    mAP_writer = tf.summary.create_file_writer("logs/mAP")
-    if args.tensorboard:
-        tb = program.TensorBoard()
-        tb.configure(argv=[None, '--logdir', 'logs','--reload_interval','15'])
-        url = tb.launch()
-        print("Tensorboard engine is running at {}".format(url))
+    tb = program.TensorBoard()
+    tb.configure(argv=[None, '--logdir', 'logs','--reload_interval','15'])
+    url = tb.launch()
+    print("Tensorboard engine is running at {}".format(url))
+    best_weight_path = ''
 
-    #training
-    for epoch in range(int(args.epochs)):
-        lr = lr_scheduler(epoch)
-        optimizer.learning_rate.assign(lr)
-        remaining_epoches = args.epochs - epoch - 1
-        epoch_start_time = time.perf_counter()
-        train_loss = 0
-        train_generator_tqdm = tqdm(enumerate(train_generator), total=len(train_generator))
-        for batch_index, (batch_imgs, batch_labels)  in train_generator_tqdm:
-            with tf.GradientTape() as tape:
-                model_outputs = model(batch_imgs, training=True)
-                data_loss = 0
-                for output_index,output_val in enumerate(model_outputs):
-                    loss = loss_fun[output_index](batch_labels[output_index], output_val)
-                    data_loss += tf.reduce_sum(loss)
+    if args.train_mode == 'fit':
+        mAP_writer = tf.summary.create_file_writer("logs/mAP")
+        coco_map_callback = CocoMapCallback(pred_generator,model,args,mAP_writer)
+        callbacks = [
+            tf.keras.callbacks.LearningRateScheduler(lr_scheduler),
+            coco_map_callback,
+            # ReduceLROnPlateau(verbose=1),
+            # EarlyStopping(patience=3, verbose=1),
+            # ModelCheckpoint('checkpoints/yolov3_train_{epoch}.tf',verbose=1, save_weights_only=True),
+            TensorBoard(log_dir='logs')
+        ]
+        model.compile(optimizer=optimizer,loss=loss_fun)
+        model.fit(train_generator,epochs=args.epochs,
+                            callbacks=callbacks,
+                            # validation_data=val_dataset,
+                            verbose=1,
+                            max_queue_size=10,
+                            workers=8,
+                            use_multiprocessing=False
+                            )
+        best_weight_path = coco_map_callback.best_weight_path
+    else:
+        print("loading dataset...")
+        start_time = time.perf_counter()
+        coco_map = EagerCocoMap(pred_generator, model, args)
+        max_coco_map = -1
+        max_coco_map_epoch = -1
+        accumulate_num = args.accumulated_gradient_num
+        accumulate_index = 0
+        accum_gradient = [tf.Variable(tf.zeros_like(this_var)) for this_var in model.trainable_variables]
 
-                total_loss = data_loss + args.weight_decay*tf.add_n([tf.nn.l2_loss(v) for v in model.trainable_variables if 'batch_normalization' not in v.name])
-            grads = tape.gradient(total_loss, model.trainable_variables)
-            accum_gradient = [acum_grad.assign_add(grad) for acum_grad, grad in zip(accum_gradient, grads)]
+        train_writer = tf.summary.create_file_writer("logs/train")
+        mAP_writer = tf.summary.create_file_writer("logs/mAP")
+        #training
+        for epoch in range(int(args.epochs)):
+            lr = lr_scheduler(epoch)
+            optimizer.learning_rate.assign(lr)
+            remaining_epoches = args.epochs - epoch - 1
+            epoch_start_time = time.perf_counter()
+            train_loss = 0
+            train_generator_tqdm = tqdm(enumerate(train_generator), total=len(train_generator))
+            for batch_index, (batch_imgs, batch_labels)  in train_generator_tqdm:
+                with tf.GradientTape() as tape:
+                    model_outputs = model(batch_imgs, training=True)
+                    data_loss = 0
+                    for output_index,output_val in enumerate(model_outputs):
+                        loss = loss_fun[output_index](batch_labels[output_index], output_val)
+                        data_loss += tf.reduce_sum(loss)
 
-            accumulate_index += 1
-            if accumulate_index == accumulate_num:
-                optimizer.apply_gradients(zip(accum_gradient, model.trainable_variables))
-                accum_gradient = [ grad.assign_sub(grad) for grad in accum_gradient]
-                accumulate_index = 0
-            train_loss += total_loss
-            train_generator_tqdm.set_description(
-                "epoch:{}/{},train_loss:{:.4f},lr:{:.6f}".format(epoch, args.epochs,
-                                                                                 train_loss/(batch_index+1),
-                                                                                 optimizer.learning_rate.numpy()))
-        train_generator.on_epoch_end()
+                    total_loss = data_loss + args.weight_decay*tf.add_n([tf.nn.l2_loss(v) for v in model.trainable_variables if 'batch_normalization' not in v.name])
+                grads = tape.gradient(total_loss, model.trainable_variables)
+                accum_gradient = [acum_grad.assign_add(grad) for acum_grad, grad in zip(accum_gradient, grads)]
 
-        with train_writer.as_default():
-            tf.summary.scalar("train_loss", train_loss/len(train_generator), step=epoch)
-            train_writer.flush()
+                accumulate_index += 1
+                if accumulate_index == accumulate_num:
+                    optimizer.apply_gradients(zip(accum_gradient, model.trainable_variables))
+                    accum_gradient = [ grad.assign_sub(grad) for grad in accum_gradient]
+                    accumulate_index = 0
+                train_loss += total_loss
+                train_generator_tqdm.set_description(
+                    "epoch:{}/{},train_loss:{:.4f},lr:{:.6f}".format(epoch, args.epochs,
+                                                                                     train_loss/(batch_index+1),
+                                                                                     optimizer.learning_rate.numpy()))
+            train_generator.on_epoch_end()
 
-        #evaluation
-        if epoch >= args.start_eval_epoch:
-            if epoch % args.eval_epoch_interval == 0:
-                summary_metrics = coco_map.eval()
-                if summary_metrics['Precision/mAP@.50IOU'] > max_coco_map:
-                    max_coco_map = summary_metrics['Precision/mAP@.50IOU']
-                    max_coco_map_epoch = epoch
-                    best_weight_path = os.path.join(args.checkpoints_dir, 'scaled_yolov4_best_{}_{:.3f}'.format(max_coco_map_epoch, max_coco_map))
-                    model.save_weights(best_weight_path)
+            with train_writer.as_default():
+                tf.summary.scalar("train_loss", train_loss/len(train_generator), step=epoch)
+                train_writer.flush()
 
-                print("max_coco_map:{},epoch:{}".format(max_coco_map,max_coco_map_epoch))
-                with mAP_writer.as_default():
-                    tf.summary.scalar("mAP@0.5", summary_metrics['Precision/mAP@.50IOU'], step=epoch)
-                    mAP_writer.flush()
-        cur_time = time.perf_counter()
-        one_epoch_time = cur_time - epoch_start_time
-        print("time elapsed: {:.3f} hour, time left: {:.3f} hour".format((cur_time-start_time)/3600,remaining_epoches*one_epoch_time/3600))
+            #evaluation
+            if epoch >= args.start_eval_epoch:
+                if epoch % args.eval_epoch_interval == 0:
+                    summary_metrics = coco_map.eval()
+                    if summary_metrics['Precision/mAP@.50IOU'] > max_coco_map:
+                        max_coco_map = summary_metrics['Precision/mAP@.50IOU']
+                        max_coco_map_epoch = epoch
+                        best_weight_path = os.path.join(args.checkpoints_dir, 'best_weight_{}_{}_{:.3f}'.format(args.model_type,max_coco_map_epoch, max_coco_map))
+                        model.save_weights(best_weight_path)
 
-        if epoch>0 and not open_tensorboard_url:
-            open_tensorboard_url = True
-            webbrowser.open(url,new=1)
+                    print("max_coco_map:{},epoch:{}".format(max_coco_map,max_coco_map_epoch))
+                    with mAP_writer.as_default():
+                        tf.summary.scalar("mAP@0.5", summary_metrics['Precision/mAP@.50IOU'], step=epoch)
+                        mAP_writer.flush()
+            cur_time = time.perf_counter()
+            one_epoch_time = cur_time - epoch_start_time
+            print("time elapsed: {:.3f} hour, time left: {:.3f} hour".format((cur_time-start_time)/3600,remaining_epoches*one_epoch_time/3600))
+
+            if epoch>0 and not open_tensorboard_url:
+                open_tensorboard_url = True
+                webbrowser.open(url,new=1)
 
     print("Training is finished!")
     #save model
@@ -265,7 +290,8 @@ def main(args):
         else:
             model = Yolov4(args, training=False)
         model.load_weights(best_weight_path)
-        model.save(os.path.join(args.output_model_dir,os.path.basename(args.class_names).split('.')[-2], 'best_model_{}_{:.3f}'.format(args.model_type, max_coco_map),'1'))
+        best_model_path = os.path.join(args.output_model_dir,best_weight_path.split('/')[-1].replace('weight','model'),'1')
+        model.save(best_model_path)
 
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
