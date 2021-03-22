@@ -86,7 +86,7 @@ def parse_args(args):
     parser.add_argument('--multi-scale', default='416',help="Input data shapes for training, use 320+32*i(i>=0)")#896
     parser.add_argument('--max-box-num-per-image', default=100)
     #optimizer
-    parser.add_argument('--optimizer', default='adam', help="choices=[adam,sgd]")
+    parser.add_argument('--optimizer', default='sgd', help="choices=[adam,sgd]")
     parser.add_argument('--momentum', default=0.9)
     parser.add_argument('--nesterov', default=True)
     parser.add_argument('--weight-decay', default=5e-4)
