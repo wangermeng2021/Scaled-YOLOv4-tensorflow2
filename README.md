@@ -2,7 +2,7 @@
 # Scaled-YOLOv4-tensorflow2
 A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: Scaling Cross Stage Partial Network](https://arxiv.org/abs/2011.08036)
 ## Update Log
-[2021-03-21] Set default optimizer as SGD, because Adam Occasionally return Nan loss when using ciou loss.
+[2021-03-21] Set default optimizer as SGD, because Adam Occasionally return Nan loss when using ciou loss.<br><br>
 [2021-02-21] Add support for: model.fit(dramatic improvement in GPU utilization); online coco evaluation callback; change default optimizer from sgd to adam <br><br>
 [2021-02-11] Add support for: one-click deployment using tensorflow Serving(very fast)<br><br>
 [2021-01-29] Add support for: mosaic,ssd_random_crop<br><br>
