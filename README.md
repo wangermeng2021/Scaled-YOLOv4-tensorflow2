@@ -22,42 +22,42 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
   cd Scaled-YOLOv4-tensorflow2
   ```
 ###   2. Install environment
-* install tesnorflow ( skip this step if it's already installed)
+* install tesnorflow (skip this step if it's already installed)
 *     pip install -r requirements.txt
 
 ## Training:
-* Download Pre-trained p5 coco pretrain models and place it under directory 'pretrained/ScaledYOLOV4_p5_coco_pretrain' :<br>
+* Download pre-trained p5 coco models and place it under directory 'pretrained/ScaledYOLOV4_p5_coco_pretrain' :<br>
    [https://drive.google.com/file/d/1glOCE3Y5Q5enW3rpVq3SmKDXzaKIw4YL/view?usp=sharing](https://drive.google.com/file/d/1glOCE3Y5Q5enW3rpVq3SmKDXzaKIw4YL/view?usp=sharing) <br>
 
-* Download Pre-trained p6 coco pretrain models and place it under directory 'pretrained/ScaledYOLOV4_p6_coco_pretrain' :<br>
+* Download pre-trained p6 coco models and place it under directory 'pretrained/ScaledYOLOV4_p6_coco_pretrain' :<br>
    [https://drive.google.com/file/d/1EymbpgiO6VkCCFdB0zSTv0B9yB6T9Fw1/view?usp=sharing](https://drive.google.com/file/d/1EymbpgiO6VkCCFdB0zSTv0B9yB6T9Fw1/view?usp=sharing) <br>
 
-* Download Pre-trained tiny coco pretrain models and place it under directory 'pretrained/ScaledYOLOV4_tiny_coco_pretrain' :<br>
+* Download pre-trained tiny coco models and place it under directory 'pretrained/ScaledYOLOV4_tiny_coco_pretrain' :<br>
    [https://drive.google.com/file/d/1x15FN7jCAFwsntaMwmSkkgIzvHXUa7xT/view?usp=sharing](https://drive.google.com/file/d/1x15FN7jCAFwsntaMwmSkkgIzvHXUa7xT/view?usp=sharing) <br>
 
 
-* For training on [Pothole dataset](https://public.roboflow.com/object-detection/pothole)(No need to download dataset,it's already included in project): <br>
-  p5(single scale):
+* For training on [Pothole dataset](https://public.roboflow.com/object-detection/pothole) (No need to download dataset,it's already included in project): <br>
+  p5 (single scale):
   ```
   python train.py --use-pretrain True --model-type p5 --dataset-type voc --dataset dataset/pothole_voc --num-classes 1 --class-names pothole.names  --voc-train-set dataset_1,train --voc-val-set dataset_1,val  --epochs 200 --batch-size 4 --multi-scale 416 --augment ssd_random_crop 
   ```
-  p5(multi scale):
+  p5 (multi scale):
   ```
   python train.py --use-pretrain True --model-type p5 --dataset-type voc --dataset dataset/pothole_voc --num-classes 1 --class-names pothole.names --voc-train-set dataset_1,train --voc-val-set dataset_1,val  --epochs 200 --batch-size 4 --multi-scale 320,352,384,416,448,480,512 --augment ssd_random_crop 
   ```
-* For training on [Chess Pieces dataset](https://public.roboflow.com/object-detection/chess-full)(No need to download dataset,it's already included in project): <br>
-  tiny(single scale):
+* For training on [Chess Pieces dataset](https://public.roboflow.com/object-detection/chess-full) (No need to download dataset,it's already included in project): <br>
+  tiny (single scale):
   ```
   python train.py --use-pretrain True --model-type tiny --dataset-type voc --dataset dataset/chess_voc --num-classes 12 --class-names chess.names --voc-train-set dataset_1,train --voc-val-set dataset_1,val  --epochs 400 --batch-size 32 --multi-scale 416 --augment ssd_random_crop 
   ```
-  tiny(multi scale):
+  tiny (multi scale):
   ```
   python train.py --use-pretrain True --model-type tiny --dataset-type voc --dataset dataset/chess_voc --num-classes 12 --class-names chess.names --voc-train-set dataset_1,train --voc-val-set dataset_1,val  --epochs 400 --batch-size 32 --multi-scale 320,352,384,416,448,480,512 --augment ssd_random_crop
 
 ## Tensorboard visualization:
   * Navigate to [http://0.0.0.0:6006](http://0.0.0.0:6006)
 
-## Evaluation results(GTX2080,mAP@0.5):
+## Evaluation results (GTX2080,mAP@0.5):
 
 | model                                               | Chess Pieces | pothole |  VOC  | COCO |
 |-----------------------------------------------------|--------------|---------|-------|------|
@@ -87,9 +87,9 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
   ![pothole_p5_detection_2.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/pothole_p5_detection_2.png)
 
 
-## Customzied training
-* Convert your dataset to Pascal VOC format(you can use labelImg to generate VOC format dataset)
-* Generate class names file(such as xxx.names)
+## Customized training
+* Convert your dataset to Pascal VOC format (you can use labelImg to generate VOC format dataset)
+* Generate class names file (such as xxx.names)
 * 
   ```
   python train.py --use-pretrain True --model-type p5 --dataset-type voc --dataset your_dataset_root_dir --num-classes num_of_classes --class-names path_of_xxx.names --voc-train-set dataset_1,train --voc-val-set dataset_1,val  --epochs 200 --batch-size 8 --multi-scale 416  --augment ssd_random_crop 
@@ -105,11 +105,11 @@ TensorFlow Serving is a flexible, high-performance serving system for machine le
   ./gen_image --model-dir ScaledYOLOv4-tensorflow2/output_model/pothole/best_model_p5_0.811
 ```
 * **Deploy model:**<br>
-    * **Server side**( docker and nvidia-docker installed ):
+    * **Server side** (docker and nvidia-docker installed):
 	
         ` ./run_image `
 	
-    * **Client side**(no need to install tensorflow):<br>
+    * **Client side** (no need to install tensorflow):<br>
         1. install client package
 
             `   pip install tfservingclient-1.0.0-cp37-cp37m-manylinux1_x86_64.whl   `
