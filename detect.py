@@ -27,6 +27,7 @@ def parse_args(args):
 
 def detect_batch_img(img,model,args):
     img = img / 255
+    img = tf.image.convert_image_dtype(img, tf.float32)
     pre_nms_decoded_boxes, pre_nms__scores = model(img, training=False)
     pre_nms_decoded_boxes = pre_nms_decoded_boxes.numpy()
     pre_nms__scores = pre_nms__scores.numpy()
@@ -92,7 +93,8 @@ def get_tta_tranform():
     return out_list
 
 def main(args):
-    model = tf.keras.models.load_model(args.model_path)
+    # model = tf.keras.models.load_model(args.model_path)
+    model = tf.saved_model.load(args.model_path)
     with open(args.class_names) as f:
         class_names = f.read().splitlines()
     img_list = os.listdir(args.pic_dir)

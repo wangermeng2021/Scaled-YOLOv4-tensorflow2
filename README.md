@@ -2,7 +2,8 @@
 # Scaled-YOLOv4-tensorflow2
 A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: Scaling Cross Stage Partial Network](https://arxiv.org/abs/2011.08036)
 ## Update Log
-[2021-03-21] Set default optimizer as SGD, because Adam Occasionally return Nan loss when using ciou loss.<br><br>
+## Update Log
+[2021-06-27] Add support for: resuming training from checkpoints.<br><br>
 [2021-02-21] Add support for: model.fit(dramatic improvement in GPU utilization); online coco evaluation callback; change default optimizer from sgd to adam <br><br>
 [2021-02-11] Add support for: one-click deployment using tensorflow Serving(very fast)<br><br>
 [2021-01-29] Add support for: mosaic,ssd_random_crop<br><br>
@@ -22,7 +23,7 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
   cd Scaled-YOLOv4-tensorflow2
   ```
 ###   2. Install environment
-* install tesnorflow ( skip this step if it's already installed)
+* install tesnorflow ( skip this step if it's already installed,test environment:tensorflow 2.4.0)
 *     pip install -r requirements.txt
 
 ## Training:
@@ -72,7 +73,7 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 ## Detection
 * For detection on Chess Pieces dataset:
   ```
-  python3 detect.py --pic-dir images/chess_pictures --model-path output_model/chess/best_model_tiny_0.985/1 --class-names dataset/chess.names --nms-score-threshold 0.1
+  python3 detect.py --pic-dir images/chess_pictures --model-path output_model/best_model_tiny_0.985/1 --class-names dataset/chess.names --nms-score-threshold 0.1
   ```
   detection result:
 
@@ -80,7 +81,7 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 
 * For detection on Pothole dataset:
   ```
-  python3 detect.py --pic-dir images/pothole_pictures --model-path output_model/pothole/best_model_p5_0.827/1 --class-names dataset/pothole.names --nms-score-threshold 0.1
+  python3 detect.py --pic-dir images/pothole_pictures --model-path output_model/best_model_p5_0.827/1 --class-names dataset/pothole.names --nms-score-threshold 0.1
   ```
   detection result:
 

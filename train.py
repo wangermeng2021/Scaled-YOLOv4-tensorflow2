@@ -35,7 +35,7 @@ def parse_args(args):
 
     parser.add_argument('--epochs', default=300, type=int)
     parser.add_argument('--batch-size', default=16, type=int)
-    parser.add_argument('--start-eval-epoch', default=100, type=int)
+    parser.add_argument('--start-eval-epoch', default=1, type=int)
     parser.add_argument('--eval-epoch-interval', default=1)
     #model
     parser.add_argument('--model-type', default='tiny', help="choices=['tiny','p5','p6','p7']")
@@ -140,20 +140,25 @@ def main(args):
         model = Yolov4(args, training=True)
         if args.use_pretrain:
             if len(os.listdir(os.path.dirname(args.p5_coco_pretrained_weights)))!=0:
-                cur_num_classes = int(args.num_classes)
-                args.num_classes = 80
-                pretrain_model = Yolov4(args, training=True)
-                pretrain_model.load_weights(args.p5_coco_pretrained_weights).expect_partial()
-                for layer in model.layers:
-                    if not layer.get_weights():
-                        continue
-                    if 'yolov3_head' in layer.name:
-                        continue
-                    layer.set_weights(pretrain_model.get_layer(layer.name).get_weights())
-                args.num_classes = cur_num_classes
-                print("Load {} weight successfully!".format(args.model_type))
+                try:
+                    model.load_weights(args.p5_coco_pretrained_weights).expect_partial()
+                    print("Load {} checkpoints successfully!".format(args.model_type))
+                except:
+                    cur_num_classes = int(args.num_classes)
+                    args.num_classes = 80
+                    pretrain_model = Yolov4(args, training=True)
+                    pretrain_model.load_weights(args.p5_coco_pretrained_weights).expect_partial()
+                    for layer in model.layers:
+                        if not layer.get_weights():
+                            continue
+                        if 'yolov3_head' in layer.name:
+                            continue
+                        layer.set_weights(pretrain_model.get_layer(layer.name).get_weights())
+                    args.num_classes = cur_num_classes
+                    print("Load {} weight successfully!".format(args.model_type))
             else:
                 raise ValueError("pretrained_weights directory is empty!")
+
     elif args.model_type == "p6":
         model = Yolov4(args, training=True)
         if args.use_pretrain:
@@ -291,7 +296,8 @@ def main(args):
             model = Yolov4(args, training=False)
         model.load_weights(best_weight_path)
         best_model_path = os.path.join(args.output_model_dir,best_weight_path.split('/')[-1].replace('weight','model'),'1')
-        model.save(best_model_path)
+        # model.save(best_model_path)
+        tf.saved_model.save(model, best_model_path)
 
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
