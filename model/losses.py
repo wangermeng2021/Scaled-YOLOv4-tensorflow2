@@ -78,8 +78,10 @@ class Yolov3BoxRegressionLoss():
                 return tf.reduce_sum(obj_mask*(1-diou_loss),[1,2,3])/pos_num, diou_loss
 
             y_true_wh = y_true_x1y1x2y2[..., 2:4] - y_true_x1y1x2y2[..., 0:2]
-            v = (4./math.pi**2)*tf.square(tf.math.atan2(pred_wh[..., 1], pred_wh[...,0])-tf.math.atan2(y_true_wh[..., 1], y_true_wh[...,0]))
-
+            # v = (4./math.pi**2)*tf.square(tf.math.atan2(pred_wh[..., 1], pred_wh[...,0])-tf.math.atan2(y_true_wh[..., 1], y_true_wh[...,0]))
+            v = (4. / math.pi ** 2) * tf.square(
+                tf.math.atan2(pred_wh[..., 1], pred_wh[..., 0] + 1e-07) - tf.math.atan2(y_true_wh[..., 1],
+                                                                                        y_true_wh[..., 0] + 1e-07))
             alpha = v/(1.-iou_scores+v+1e-07)
 
             # alpha = v * tf.stop_gradient(pred_wh[..., 0] * pred_wh[..., 0], pred_wh[..., 1] * pred_wh[..., 1])

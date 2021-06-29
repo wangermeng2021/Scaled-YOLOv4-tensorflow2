@@ -1,7 +1,23 @@
 
 # Scaled-YOLOv4-tensorflow2
+[![Python 3.7](https://img.shields.io/badge/Python-3.7-3776AB)](https://www.python.org/downloads/release/python-360/)
+[![TensorFlow 2.4](https://img.shields.io/badge/TensorFlow-2.4-FF6F00?logo=tensorflow)](https://github.com/tensorflow/tensorflow/releases/tag/v2.2.0)
+
 A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: Scaling Cross Stage Partial Network](https://arxiv.org/abs/2011.08036)
+
+## Note:
+I strongly recommend using voc dataset type(default dataset type), because my GPU is old, so coco dataset type is not fully tested.
 ## Update Log
+[2021-06-29]:
+
+Major Features and Improvements:
+* Add support for: Sharpness-Aware Minimization(SAM_sgd,SAM_adam).
+
+Bug Fixes and Changes:
+* Fix the nan loss error when using adam optimizer
+* Set default optimizer as SAM_adam
+* Change default running mode from 'fit' to 'eager mode'
+
 [2021-06-27] Add support for: resuming training from checkpoints.<br><br>
 [2021-02-21] Add support for: model.fit(dramatic improvement in GPU utilization); online coco evaluation callback; change default optimizer from sgd to adam <br><br>
 [2021-02-11] Add support for: one-click deployment using tensorflow Serving(very fast)<br><br>
@@ -36,6 +52,8 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
    [https://drive.google.com/file/d/1x15FN7jCAFwsntaMwmSkkgIzvHXUa7xT/view?usp=sharing](https://drive.google.com/file/d/1x15FN7jCAFwsntaMwmSkkgIzvHXUa7xT/view?usp=sharing) <br>
 
 
+
+
 * For training on [Pothole dataset](https://public.roboflow.com/object-detection/pothole)(No need to download dataset,it's already included in project): <br>
   p5(single scale):
   ```
@@ -54,6 +72,10 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
   ```
   python train.py --use-pretrain True --model-type tiny --dataset-type voc --dataset dataset/chess_voc --num-classes 12 --class-names chess.names --voc-train-set dataset_1,train --voc-val-set dataset_1,val  --epochs 400 --batch-size 32 --multi-scale 320,352,384,416,448,480,512 --augment ssd_random_crop
 
+* For training with SAM_sgd on [Chess Pieces dataset](https://public.roboflow.com/object-detection/chess-full): <br>
+  ```
+  python train.py --optimizer SAM_sgd --use-pretrain True --model-type tiny --dataset-type voc --dataset dataset/chess_voc --num-classes 12 --class-names chess.names --voc-train-set dataset_1,train --voc-val-set dataset_1,val  --epochs 400 --batch-size 32 --multi-scale 416 --augment ssd_random_crop 
+  ```
 ## Tensorboard visualization:
   * Navigate to [http://0.0.0.0:6006](http://0.0.0.0:6006)
 

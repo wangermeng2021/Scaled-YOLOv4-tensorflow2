@@ -25,17 +25,19 @@ physical_devices = tf.config.list_physical_devices('GPU')
 if physical_devices:
     tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
+
+
 def parse_args(args):
     parser = argparse.ArgumentParser(description='Simple training script for using ScaledYOLOv4.')
     #save model
     parser.add_argument('--output-model-dir', default='./output_model')
     #training
 
-    parser.add_argument('--train-mode', default='fit',help="choices=['fit','eager']")
+    parser.add_argument('--train-mode', default='eager',help="choices=['fit','eager']")
 
     parser.add_argument('--epochs', default=300, type=int)
     parser.add_argument('--batch-size', default=16, type=int)
-    parser.add_argument('--start-eval-epoch', default=1, type=int)
+    parser.add_argument('--start-eval-epoch', default=50, type=int)
     parser.add_argument('--eval-epoch-interval', default=1)
     #model
     parser.add_argument('--model-type', default='tiny', help="choices=['tiny','p5','p6','p7']")
@@ -86,7 +88,7 @@ def parse_args(args):
     parser.add_argument('--multi-scale', default='416',help="Input data shapes for training, use 320+32*i(i>=0)")#896
     parser.add_argument('--max-box-num-per-image', default=100)
     #optimizer
-    parser.add_argument('--optimizer', default='sgd', help="choices=[adam,sgd]")
+    parser.add_argument('--optimizer', default='SAM_adam', help="choices=[adam,sgd,'SAM_sgd','SAM_adam']")
     parser.add_argument('--momentum', default=0.9)
     parser.add_argument('--nesterov', default=True)
     parser.add_argument('--weight-decay', default=5e-4)
@@ -122,18 +124,22 @@ def main(args):
         model = Yolov4_tiny(args, training=True)
         if args.use_pretrain:
             if len(os.listdir(os.path.dirname(args.tiny_coco_pretrained_weights))) != 0:
-                cur_num_classes = int(args.num_classes)
-                args.num_classes = 80
-                pretrain_model = Yolov4_tiny(args, training=True)
-                pretrain_model.load_weights(args.tiny_coco_pretrained_weights).expect_partial()
-                for layer in model.layers:
-                    if not layer.get_weights():
-                        continue
-                    if 'yolov3_head' in layer.name:
-                        continue
-                    layer.set_weights(pretrain_model.get_layer(layer.name).get_weights())
-                args.num_classes = cur_num_classes
-                print("Load {} weight successfully!".format(args.model_type))
+                try:
+                    model.load_weights(args.tiny_coco_pretrained_weights).expect_partial()
+                    print("Load {} checkpoints successfully!".format(args.model_type))
+                except:
+                    cur_num_classes = int(args.num_classes)
+                    args.num_classes = 80
+                    pretrain_model = Yolov4_tiny(args, training=True)
+                    pretrain_model.load_weights(args.tiny_coco_pretrained_weights).expect_partial()
+                    for layer in model.layers:
+                        if not layer.get_weights():
+                            continue
+                        if 'yolov3_head' in layer.name:
+                            continue
+                        layer.set_weights(pretrain_model.get_layer(layer.name).get_weights())
+                    args.num_classes = cur_num_classes
+                    print("Load {} weight successfully!".format(args.model_type))
             else:
                 raise ValueError("pretrained_weights directory is empty!")
     elif args.model_type == "p5":
@@ -159,22 +165,27 @@ def main(args):
             else:
                 raise ValueError("pretrained_weights directory is empty!")
 
+
     elif args.model_type == "p6":
         model = Yolov4(args, training=True)
         if args.use_pretrain:
             if len(os.listdir(os.path.dirname(args.p6_coco_pretrained_weights))) != 0:
-                cur_num_classes = int(args.num_classes)
-                args.num_classes = 80
-                pretrain_model = Yolov4(args, training=True)
-                pretrain_model.load_weights(args.p6_coco_pretrained_weights).expect_partial()
-                for layer in model.layers:
-                    if not layer.get_weights():
-                        continue
-                    if 'yolov3_head' in layer.name:
-                        continue
-                    layer.set_weights(pretrain_model.get_layer(layer.name).get_weights())
-                args.num_classes = cur_num_classes
-                print("Load {} weight successfully!".format(args.model_type))
+                try:
+                    model.load_weights(args.p6_coco_pretrained_weights).expect_partial()
+                    print("Load {} checkpoints successfully!".format(args.model_type))
+                except:
+                    cur_num_classes = int(args.num_classes)
+                    args.num_classes = 80
+                    pretrain_model = Yolov4(args, training=True)
+                    pretrain_model.load_weights(args.p6_coco_pretrained_weights).expect_partial()
+                    for layer in model.layers:
+                        if not layer.get_weights():
+                            continue
+                        if 'yolov3_head' in layer.name:
+                            continue
+                        layer.set_weights(pretrain_model.get_layer(layer.name).get_weights())
+                    args.num_classes = cur_num_classes
+                    print("Load {} weight successfully!".format(args.model_type))
             else:
                 raise ValueError("pretrained_weights directory is empty!")
     else:
@@ -235,28 +246,70 @@ def main(args):
             epoch_start_time = time.perf_counter()
             train_loss = 0
             train_generator_tqdm = tqdm(enumerate(train_generator), total=len(train_generator))
-            for batch_index, (batch_imgs, batch_labels)  in train_generator_tqdm:
-                with tf.GradientTape() as tape:
-                    model_outputs = model(batch_imgs, training=True)
-                    data_loss = 0
-                    for output_index,output_val in enumerate(model_outputs):
-                        loss = loss_fun[output_index](batch_labels[output_index], output_val)
-                        data_loss += tf.reduce_sum(loss)
 
-                    total_loss = data_loss + args.weight_decay*tf.add_n([tf.nn.l2_loss(v) for v in model.trainable_variables if 'batch_normalization' not in v.name])
-                grads = tape.gradient(total_loss, model.trainable_variables)
-                accum_gradient = [acum_grad.assign_add(grad) for acum_grad, grad in zip(accum_gradient, grads)]
 
-                accumulate_index += 1
-                if accumulate_index == accumulate_num:
-                    optimizer.apply_gradients(zip(accum_gradient, model.trainable_variables))
-                    accum_gradient = [ grad.assign_sub(grad) for grad in accum_gradient]
-                    accumulate_index = 0
-                train_loss += total_loss
-                train_generator_tqdm.set_description(
-                    "epoch:{}/{},train_loss:{:.4f},lr:{:.6f}".format(epoch, args.epochs,
-                                                                                     train_loss/(batch_index+1),
-                                                                                     optimizer.learning_rate.numpy()))
+
+
+
+            if args.optimizer.startswith('SAM'):
+                for batch_index, (batch_imgs, batch_labels) in train_generator_tqdm:
+                    with tf.GradientTape() as tape:
+                        model_outputs = model(batch_imgs, training=True)
+                        data_loss = 0
+                        for output_index, output_val in enumerate(model_outputs):
+                            loss = loss_fun[output_index](batch_labels[output_index], output_val)
+                            data_loss += tf.reduce_sum(loss)
+
+                        total_loss = data_loss + args.weight_decay * tf.add_n(
+                            [tf.nn.l2_loss(v) for v in model.trainable_variables if
+                             'batch_normalization' not in v.name])
+                    grads = tape.gradient(total_loss, model.trainable_variables)
+
+                    optimizer.first_step(grads, model.trainable_variables)
+
+                    with tf.GradientTape() as tape:
+                        model_outputs = model(batch_imgs, training=True)
+                        data_loss = 0
+                        for output_index, output_val in enumerate(model_outputs):
+                            loss = loss_fun[output_index](batch_labels[output_index], output_val)
+                            data_loss += tf.reduce_sum(loss)
+
+                        total_loss = data_loss + args.weight_decay * tf.add_n(
+                            [tf.nn.l2_loss(v) for v in model.trainable_variables if
+                             'batch_normalization' not in v.name])
+                    grads = tape.gradient(total_loss, model.trainable_variables)
+
+                    optimizer.second_step(grads, model.trainable_variables)
+
+                    train_loss += total_loss
+                    train_generator_tqdm.set_description(
+                        "epoch:{}/{},train_loss:{:.4f},lr:{:.6f}".format(epoch, args.epochs,
+                                                                         train_loss / (batch_index + 1),
+                                                                         optimizer.learning_rate.numpy()))
+            else:
+
+                for batch_index, (batch_imgs, batch_labels)  in train_generator_tqdm:
+                    with tf.GradientTape() as tape:
+                        model_outputs = model(batch_imgs, training=True)
+                        data_loss = 0
+                        for output_index,output_val in enumerate(model_outputs):
+                            loss = loss_fun[output_index](batch_labels[output_index], output_val)
+                            data_loss += tf.reduce_sum(loss)
+
+                        total_loss = data_loss + args.weight_decay*tf.add_n([tf.nn.l2_loss(v) for v in model.trainable_variables if 'batch_normalization' not in v.name])
+                    grads = tape.gradient(total_loss, model.trainable_variables)
+                    accum_gradient = [acum_grad.assign_add(grad) for acum_grad, grad in zip(accum_gradient, grads)]
+                    accumulate_index += 1
+                    if accumulate_index == accumulate_num:
+                        optimizer.apply_gradients(zip(accum_gradient, model.trainable_variables))
+                        accum_gradient = [ grad.assign_sub(grad) for grad in accum_gradient]
+                        accumulate_index = 0
+                    train_loss += total_loss
+                    train_generator_tqdm.set_description(
+                        "epoch:{}/{},train_loss:{:.4f},lr:{:.6f}".format(epoch, args.epochs,
+                                                                                         train_loss/(batch_index+1),
+                                                                                         optimizer.learning_rate.numpy()))
+
             train_generator.on_epoch_end()
 
             with train_writer.as_default():
