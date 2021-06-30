@@ -28,8 +28,15 @@ Bug Fixes and Changes:
 [2021-01-10] Add support for: yolov4-tiny,yolov4-large p5/p6/p7,online coco evaluation,multi scale training<br><br>
 
 ## Demo
+ScaledYOLOv4_p5_detection_result:
+
 ![pothole_p5_detection_3.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/pothole_p5_detection_3.png)
 ![chess_p5_detection.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/chess_p5_detection.png)
+
+ScaledYOLOv4_tiny_detection_result:
+
+![safehat_tiny_detection_1.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/safehat_tiny_detection_1.png)
+![safehat_tiny_detection_2.png](https://github.com/wangermeng2021/ScaledYOLOv4-tensorflow2/blob/main/images/safehat_tiny_detection_2.png)
 
 ## Installation
 ###  1. Clone project
