@@ -27,7 +27,6 @@ class EagerCocoMap():
         groundtruth_valids = np.concatenate(groundtruth_valids, axis=0)
 
         self.coco = CocoEvalidation(groundtruth_boxes,groundtruth_classes,groundtruth_valids,class_names)
-
     def eval(self):
 
         detection_boxes = []

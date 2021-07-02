@@ -115,6 +115,8 @@ def parse_args(args):
 
     parser.add_argument('--tensorboard', default=True, type=bool)
 
+    parser.add_argument('--ema', default=False, type=bool)
+
     return parser.parse_args(args)
 
 def main(args):
@@ -205,6 +207,7 @@ def main(args):
     print("Tensorboard engine is running at {}".format(url))
     best_weight_path = ''
 
+
     if args.train_mode == 'fit':
         mAP_writer = tf.summary.create_file_writer("logs/mAP")
         coco_map_callback = CocoMapCallback(pred_generator,model,args,mAP_writer)
@@ -228,8 +231,12 @@ def main(args):
         best_weight_path = coco_map_callback.best_weight_path
     else:
         print("loading dataset...")
-        start_time = time.perf_counter()
+
+        if args.ema:
+            ema = tf.train.ExponentialMovingAverage(decay=0.9)
         coco_map = EagerCocoMap(pred_generator, model, args)
+
+        start_time = time.perf_counter()
         max_coco_map = -1
         max_coco_map_epoch = -1
         accumulate_num = args.accumulated_gradient_num
@@ -286,6 +293,8 @@ def main(args):
                         "epoch:{}/{},train_loss:{:.4f},lr:{:.6f}".format(epoch, args.epochs,
                                                                          train_loss / (batch_index + 1),
                                                                          optimizer.learning_rate.numpy()))
+                    if args.ema:
+                        ema.apply(model.trainable_variables)
             else:
 
                 for batch_index, (batch_imgs, batch_labels)  in train_generator_tqdm:
@@ -309,7 +318,8 @@ def main(args):
                         "epoch:{}/{},train_loss:{:.4f},lr:{:.6f}".format(epoch, args.epochs,
                                                                                          train_loss/(batch_index+1),
                                                                                          optimizer.learning_rate.numpy()))
-
+                    if args.ema:
+                        ema.apply(model.trainable_variables)
             train_generator.on_epoch_end()
 
             with train_writer.as_default():
@@ -319,12 +329,27 @@ def main(args):
             #evaluation
             if epoch >= args.start_eval_epoch:
                 if epoch % args.eval_epoch_interval == 0:
-                    summary_metrics = coco_map.eval()
-                    if summary_metrics['Precision/mAP@.50IOU'] > max_coco_map:
-                        max_coco_map = summary_metrics['Precision/mAP@.50IOU']
-                        max_coco_map_epoch = epoch
-                        best_weight_path = os.path.join(args.checkpoints_dir, 'best_weight_{}_{}_{:.3f}'.format(args.model_type,max_coco_map_epoch, max_coco_map))
-                        model.save_weights(best_weight_path)
+
+                    if args.ema:
+                        model.save_weights("temp_model_variables.h5")
+                        for var in model.trainable_variables:
+                            var.assign(ema.average(var))
+
+                        summary_metrics = coco_map.eval()
+                        if summary_metrics['Precision/mAP@.50IOU'] > max_coco_map:
+                            max_coco_map = summary_metrics['Precision/mAP@.50IOU']
+                            max_coco_map_epoch = epoch
+                            best_weight_path = os.path.join(args.checkpoints_dir, 'best_weight_{}_{}_{:.3f}'.format(args.model_type,max_coco_map_epoch, max_coco_map))
+                            model.save_weights(best_weight_path)
+
+                        model.load_weights("temp_model_variables.h5")
+                    else:
+                        summary_metrics = coco_map.eval()
+                        if summary_metrics['Precision/mAP@.50IOU'] > max_coco_map:
+                            max_coco_map = summary_metrics['Precision/mAP@.50IOU']
+                            max_coco_map_epoch = epoch
+                            best_weight_path = os.path.join(args.checkpoints_dir, 'best_weight_{}_{}_{:.3f}'.format(args.model_type,max_coco_map_epoch, max_coco_map))
+                            model.save_weights(best_weight_path)
 
                     print("max_coco_map:{},epoch:{}".format(max_coco_map,max_coco_map_epoch))
                     with mAP_writer.as_default():

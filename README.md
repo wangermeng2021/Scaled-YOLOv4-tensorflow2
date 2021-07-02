@@ -5,9 +5,11 @@
 
 A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: Scaling Cross Stage Partial Network](https://arxiv.org/abs/2011.08036)
 
-## Note:
-I strongly recommend using voc dataset type(default dataset type), because my GPU is old, so coco dataset type is not fully tested.
+
 ## Update Log
+[2021-07-02]:
+* Add support for: Exponential moving average decay for variables. Improve mAP from 0.985 to 0.990 on Chess Pieces dataset.
+
 [2021-06-29]:
 
 Major Features and Improvements:
@@ -48,6 +50,10 @@ ScaledYOLOv4_tiny_detection_result:
 * install tesnorflow ( skip this step if it's already installed,test environment:tensorflow 2.4.0)
 *     pip install -r requirements.txt
 
+
+## Note:
+I strongly recommend using voc dataset type(default dataset type), because my GPU is old, so coco dataset type is not fully tested.
+
 ## Training:
 * Download Pre-trained p5 coco pretrain models and place it under directory 'pretrained/ScaledYOLOV4_p5_coco_pretrain' :<br>
    [https://drive.google.com/file/d/1glOCE3Y5Q5enW3rpVq3SmKDXzaKIw4YL/view?usp=sharing](https://drive.google.com/file/d/1glOCE3Y5Q5enW3rpVq3SmKDXzaKIw4YL/view?usp=sharing) <br>
@@ -83,6 +89,10 @@ ScaledYOLOv4_tiny_detection_result:
   ```
   python train.py --optimizer SAM_sgd --use-pretrain True --model-type tiny --dataset-type voc --dataset dataset/chess_voc --num-classes 12 --class-names chess.names --voc-train-set dataset_1,train --voc-val-set dataset_1,val  --epochs 400 --batch-size 32 --multi-scale 416 --augment ssd_random_crop 
   ```
+* For training with ema(Exponential Moving Average) on [Chess Pieces dataset](https://public.roboflow.com/object-detection/chess-full): <br>
+  ```
+  python train.py --ema True --use-pretrain True --model-type tiny --dataset-type voc --dataset dataset/chess_voc --num-classes 12 --class-names chess.names --voc-train-set dataset_1,train --voc-val-set dataset_1,val  --epochs 400 --batch-size 32 --multi-scale 416 --augment ssd_random_crop 
+  ``` 
 ## Tensorboard visualization:
   * Navigate to [http://0.0.0.0:6006](http://0.0.0.0:6006)
 
@@ -91,6 +101,7 @@ ScaledYOLOv4_tiny_detection_result:
 | model                                               | Chess Pieces | pothole |  VOC  | COCO |
 |-----------------------------------------------------|--------------|---------|-------|------|
 | Scaled-YoloV4-tiny(416)                             |     0.985    |         |       |      |
+| Scaled-YoloV4-tiny(416)+ema                         |     0.990    |         |       |      |
 | AlexeyAB's YoloV4(416)                              |              |  0.814  |       |      |
 | Scaled-YoloV4-p5(416)                               |              |  0.826  |       |      |
 
