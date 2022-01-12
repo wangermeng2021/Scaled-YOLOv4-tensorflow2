@@ -48,6 +48,8 @@ def parse_args(args):
                         default='./pretrain/ScaledYOLOV4_p5_coco_pretrain/coco_pretrain')
     parser.add_argument('--p6-coco-pretrained-weights',
                         default='./pretrain/ScaledYOLOV4_p6_coco_pretrain/coco_pretrain')
+    parser.add_argument('--p7-coco-pretrained-weights',
+                        default='./pretrain/ScaledYOLOV4_p7_coco_pretrain/variables')
     parser.add_argument('--checkpoints-dir', default='./checkpoints',help="Directory to store  checkpoints of model during training.")
     #loss
     parser.add_argument('--box-regression-loss', default='ciou',help="choices=['giou','diou','ciou']")
@@ -190,6 +192,30 @@ def main(args):
                     print("Load {} weight successfully!".format(args.model_type))
             else:
                 raise ValueError("pretrained_weights directory is empty!")
+                
+
+    elif args.model_type == "p7":
+        model = Yolov4(args, training=True)
+        if args.use_pretrain:
+            if len(os.listdir(os.path.dirname(args.p7_coco_pretrained_weights))) != 0:
+                try:
+                    model.load_weights(args.p7_coco_pretrained_weights).expect_partial()
+                    print("Load {} checkpoints successfully!".format(args.model_type))
+                except:
+                    cur_num_classes = int(args.num_classes)
+                    args.num_classes = 80
+                    pretrain_model = Yolov4(args, training=True)
+                    pretrain_model.load_weights(args.p7_coco_pretrained_weights).expect_partial()
+                    for layer in model.layers:
+                        if not layer.get_weights():
+                            continue
+                        if 'yolov3_head' in layer.name:
+                            continue
+                        layer.set_weights(pretrain_model.get_layer(layer.name).get_weights())
+                    args.num_classes = cur_num_classes
+                    print("Load {} weight successfully!".format(args.model_type))
+            else:
+                raise ValueError("pretrained_weights directory is empty!")                
     else:
         model = Yolov4(args, training=True)
         print("pretrain weight currently don't support p7!")
