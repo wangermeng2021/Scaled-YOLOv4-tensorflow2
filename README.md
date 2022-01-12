@@ -9,7 +9,7 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 ## Update Log
 
 [2022-01-12]:
-* Add P7 weights
+* Add P7 weights and functionality in train.py
 
 [2021-07-02]:
 * Add support for: Exponential moving average decay for variables. Improve mAP from 0.985 to 0.990 on Chess Pieces dataset.
