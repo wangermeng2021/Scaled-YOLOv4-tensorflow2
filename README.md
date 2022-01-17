@@ -8,6 +8,9 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 
 ## Update Log
 
+[2022-01-17]:
+* Add Cyclic Learning Rate Scheduler
+
 [2022-01-12]:
 * Add P7 weights and functionality in train.py
 
