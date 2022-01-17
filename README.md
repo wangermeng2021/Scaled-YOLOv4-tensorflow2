@@ -1,5 +1,5 @@
 
-# Scaled-YOLOv4-tensorflow2
+# Scaled-YOLOv4-tensorflow2( with p5, p6 and p7 weights )
 [![Python 3.7](https://img.shields.io/badge/Python-3.7-3776AB)](https://www.python.org/downloads/release/python-360/)
 [![TensorFlow 2.4](https://img.shields.io/badge/TensorFlow-2.4-FF6F00?logo=tensorflow)](https://github.com/tensorflow/tensorflow/releases/tag/v2.2.0)
 
@@ -7,6 +7,13 @@ A Tensorflow2.x implementation of Scaled-YOLOv4 as described in [Scaled-YOLOv4: 
 
 
 ## Update Log
+
+[2022-01-17]:
+* Add Cyclic Learning Rate Scheduler
+
+[2022-01-12]:
+* Add P7 weights and functionality in train.py
+
 [2021-07-02]:
 * Add support for: Exponential moving average decay for variables. Improve mAP from 0.985 to 0.990 on Chess Pieces dataset.
 
@@ -60,6 +67,9 @@ I strongly recommend using voc dataset type(default dataset type), because my GP
 
 * Download Pre-trained p6 coco pretrain models and place it under directory 'pretrained/ScaledYOLOV4_p6_coco_pretrain' :<br>
    [https://drive.google.com/file/d/1EymbpgiO6VkCCFdB0zSTv0B9yB6T9Fw1/view?usp=sharing](https://drive.google.com/file/d/1EymbpgiO6VkCCFdB0zSTv0B9yB6T9Fw1/view?usp=sharing) <br>
+   
+* Download Pre-trained p7 coco pretrain models and place it under directory 'pretrained/ScaledYOLOV4_p7_coco_pretrain' :<br>
+   [https://drive.google.com/file/d/1_DoAp_PA7nP4Mwq7wEspn-TAiY7Ea-5Y/view?usp=sharing](https://drive.google.com/file/d/1_DoAp_PA7nP4Mwq7wEspn-TAiY7Ea-5Y/view?usp=sharing) <br>
 
 * Download Pre-trained tiny coco pretrain models and place it under directory 'pretrained/ScaledYOLOV4_tiny_coco_pretrain' :<br>
    [https://drive.google.com/file/d/1x15FN7jCAFwsntaMwmSkkgIzvHXUa7xT/view?usp=sharing](https://drive.google.com/file/d/1x15FN7jCAFwsntaMwmSkkgIzvHXUa7xT/view?usp=sharing) <br>
@@ -160,6 +170,7 @@ TensorFlow Serving is a flexible, high-performance serving system for machine le
             `   python demo.py --pic-dir xxxx --class-names xxx.names   `
 
 
+### Thanks to wangermeng2021 for the Scaled yolov4
 ## References
 * [https://github.com/WongKinYiu/ScaledYOLOv4](https://github.com/WongKinYiu/ScaledYOLOv4)
 * [https://github.com/ultralytics/yolov5](https://github.com/ultralytics/yolov5)
