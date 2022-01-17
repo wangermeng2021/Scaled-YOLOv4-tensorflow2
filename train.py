@@ -95,7 +95,7 @@ def parse_args(args):
     parser.add_argument('--nesterov', default=True)
     parser.add_argument('--weight-decay', default=5e-4)
     #lr scheduler
-    parser.add_argument('--lr-scheduler', default='cosine', type=str, help="choices=['step','warmup_cosinedecay']")
+    parser.add_argument('--lr-scheduler', default='cosine', type=str, help="choices=['cyclic','step','warmup_cosinedecay']")
     parser.add_argument('--init-lr', default=1e-3, type=float)
     parser.add_argument('--lr-decay', default=0.1, type=float)
     parser.add_argument('--lr-decay-epoch', default=[160, 180])
