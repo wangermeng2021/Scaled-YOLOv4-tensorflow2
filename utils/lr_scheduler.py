@@ -1,6 +1,7 @@
 
 import tensorflow as tf
 import numpy as np
+from clr_callback import CyclicLR
 
 def get_lr_scheduler(args):
     if args.lr_scheduler == 'step':
@@ -23,6 +24,9 @@ def get_lr_scheduler(args):
                         1.0 + tf.math.cos(np.pi / (args.epochs - args.warmup_epochs) * (epoch - args.warmup_epochs))) / 2.0
             print(current_epoch_lr)
             return current_epoch_lr
+    elif args.lr_scheduler == 'cyclic':
+        clr = CyclicLR(base_lr=0.001, max_lr=0.005, step_size= 2000, mode='exp_range', gamma=0.99994)
+        return clr       
     else:
         raise ValueError("{} is not supported!".format(args.lr_scheduler))
     return scheduler
